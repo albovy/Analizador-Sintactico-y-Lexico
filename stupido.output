@@ -1,0 +1,5672 @@
+Gramática
+
+    0 $accept: programa $end
+
+    1 programa: definicion_programa
+    2         | definicion_paquete
+
+    3 definicion_programa: PROGRAMA nombre ';' bloque_programa
+
+    4 uno_o_mas_nombres: nombre
+    5                  | uno_o_mas_nombres ',' nombre
+
+    6 nombre: IDENTIFICADOR
+    7       | nombre CUATRO_PTOS IDENTIFICADOR
+
+    8 bloque_programa: declaracion_cargas declaracion_tipos declaracion_constantes declaracion_variables bloque_instrucciones
+
+    9 definicion_paquete: PAQUETE nombre ';' seccion_cabecera seccion_cuerpo
+
+   10 seccion_cabecera: CABECERA declaracion_cargas declaracion_tipos declaracion_constantes declaracion_variables declaracion_interfaces
+
+   11 seccion_cuerpo: CUERPO declaracion_tipos declaracion_constantes declaracion_variables declaraciones_subprogramas
+
+   12 declaracion_cargas: %empty
+   13                   | CARGA multiple_declaracion_cargas ';'
+
+   14 multiple_declaracion_cargas: declaracion_carga
+   15                            | multiple_declaracion_cargas ',' declaracion_carga
+
+   16 declaracion_carga: nombre
+   17                  | nombre EN PATH
+   18                  | nombre '(' uno_o_mas_nombres ')'
+   19                  | nombre EN PATH '(' uno_o_mas_nombres ')'
+
+   20 declaracion_tipos: %empty
+   21                  | TIPO varias_declaracion_tipo
+
+   22 varias_declaracion_tipo: declaracion_tipo
+   23                        | varias_declaracion_tipo declaracion_tipo
+
+   24 declaracion_tipo: nombre '=' tipo_no_estructurado_o_nombre_tipo ';'
+   25                 | nombre '=' tipo_estructurado
+
+   26 tipo_estructurado: tipo_registro
+   27                  | declaracion_clase
+
+   28 tipo_no_estructurado_o_nombre_tipo: nombre
+   29                                   | tipo_escalar
+   30                                   | tipo_fichero
+   31                                   | tipo_enumerado
+   32                                   | tipo_lista
+   33                                   | tipo_lista_asociativa
+   34                                   | tipo_conjunto
+
+   35 tipo_escalar: ENTERO
+   36             | REAL
+   37             | BOOLEANO
+   38             | CARACTER
+   39             | CADENA
+
+   40 tipo_fichero: FICHERO
+
+   41 tipo_enumerado: '(' varias_expresiones_constantes ')'
+
+   42 tipo_lista: LISTA DE tipo_no_estructurado_o_nombre_tipo
+   43           | LISTA '[' varios_rango ']' DE tipo_no_estructurado_o_nombre_tipo
+
+   44 tipo_lista_asociativa: LISTA ASOCIATIVA DE tipo_no_estructurado_o_nombre_tipo
+
+   45 tipo_conjunto: CONJUNTO DE tipo_no_estructurado_o_nombre_tipo
+
+   46 tipo_registro: REGISTRO '{' varias_declaraciones_campo '}'
+
+   47 varias_declaraciones_campo: declaracion_campo
+   48                           | varias_declaraciones_campo declaracion_campo
+
+   49 declaracion_campo: uno_o_mas_nombres ':' tipo_no_estructurado_o_nombre_tipo ';'
+
+   50 varios_rango: rango
+   51             | varios_rango ',' rango
+
+   52 rango: expresion DOS_PTOS expresion
+   53      | expresion DOS_PTOS expresion DOS_PTOS expresion
+
+   54 declaracion_constantes: %empty
+   55                       | CONSTANTE varias_declaracion_constantes
+
+   56 varias_declaracion_constantes: declaracion_constante
+   57                              | varias_declaracion_constantes declaracion_constante
+
+   58 declaracion_constante: nombre ':' tipo_no_estructurado_o_nombre_tipo '=' valor_constante ';'
+
+   59 valores_constantes: valor_constante
+   60                   | valores_constantes ',' valor_constante
+
+   61 valor_constante: expresion
+   62                | '[' valores_constantes ']'
+   63                | '[' claves_valores ']'
+   64                | '[' campos_valores ']'
+
+   65 claves_valores: clave_valor
+   66               | claves_valores ',' clave_valor
+
+   67 clave_valor: CTC_CADENA FLECHA_DOBLE valor_constante
+
+   68 campos_valores: campo_valor
+   69               | campos_valores ',' campo_valor
+
+   70 campo_valor: nombre FLECHA_DOBLE valor_constante
+
+   71 declaracion_variables: %empty
+   72                      | VARIABLE varias_declaracion_variables
+
+   73 varias_declaracion_variables: declaracion_variable
+   74                             | varias_declaracion_variables declaracion_variable
+
+   75 declaracion_variable: uno_o_mas_nombres ':' tipo_no_estructurado_o_nombre_tipo ';'
+   76                     | uno_o_mas_nombres ':' tipo_no_estructurado_o_nombre_tipo '=' valor_constante ';'
+
+   77 declaracion_interfaces: %empty
+   78                       | INTERFAZ varias_cabeceras_subprogramas
+
+   79 varias_cabeceras_subprogramas: cabecera_subprograma ';'
+   80                              | varias_cabeceras_subprogramas cabecera_subprograma ';'
+
+   81 declaracion_clase: CLASE final '{' declaraciones_publicas ceroOuna_declaraciones_semi ceroOuna_declaraciones_privadas '}'
+   82                  | CLASE final '(' uno_o_mas_nombres ')' '{' declaraciones_publicas ceroOuna_declaraciones_semi ceroOuna_declaraciones_privadas '}'
+
+   83 final: %empty
+   84      | FINAL
+
+   85 ceroOuna_declaraciones_semi: %empty
+   86                            | declaraciones_semi
+
+   87 ceroOuna_declaraciones_privadas: %empty
+   88                                | declaraciones_privadas
+
+   89 declaraciones_publicas: PUBLICO varias_declaraciones_componentes
+   90                       | varias_declaraciones_componentes
+
+   91 declaraciones_semi: SEMIPUBLICO varias_declaraciones_componentes
+
+   92 declaraciones_privadas: PRIVADO varias_declaraciones_componentes
+
+   93 varias_declaraciones_componentes: declaracion_componente
+   94                                 | varias_declaraciones_componentes declaracion_componente
+
+   95 declaracion_componente: declaracion_tipo_anidado
+   96                       | declaracion_constante_anidada
+   97                       | declaracion_atributos
+   98                       | cabecera_subprograma ';'
+   99                       | cabecera_subprograma ';' modificadores ';'
+
+  100 declaracion_tipo_anidado: TIPO declaracion_tipo
+
+  101 declaracion_constante_anidada: CONSTANTE declaracion_constante
+
+  102 declaracion_atributos: uno_o_mas_nombres ':' tipo_no_estructurado_o_nombre_tipo ';'
+
+  103 modificadores: modificador
+  104              | modificadores ',' modificador
+
+  105 modificador: GENERICO
+  106            | ABSTRACTO
+  107            | ESPECIFICO
+  108            | FINAL
+
+  109 declaraciones_subprogramas: declaracion_subprograma
+  110                           | declaraciones_subprogramas declaracion_subprograma
+
+  111 declaracion_subprograma: cabecera_subprograma bloque_subprograma
+
+  112 cabecera_subprograma: cabecera_funcion
+  113                     | cabecera_procedimiento
+  114                     | cabecera_constructor
+  115                     | cabecera_destructor
+
+  116 cabecera_funcion: FUNCION nombre declaracion_parametros FLECHA_DOBLE tipo_no_estructurado_o_nombre_tipo
+
+  117 cabecera_procedimiento: PROCEDIMIENTO nombre declaracion_parametros
+
+  118 cabecera_constructor: CONSTRUCTOR nombre declaracion_parametros
+
+  119 cabecera_destructor: DESTRUCTOR nombre
+
+  120 declaracion_parametros: %empty
+  121                       | '(' lista_parametros_formales ')'
+
+  122 lista_parametros_formales: parametros_formales
+  123                          | lista_parametros_formales ';' parametros_formales
+
+  124 parametros_formales: uno_o_mas_nombres ':' tipo_no_estructurado_o_nombre_tipo
+  125                    | uno_o_mas_nombres ':' tipo_no_estructurado_o_nombre_tipo MODIFICABLE
+
+  126 bloque_subprograma: declaracion_tipos declaracion_constantes declaracion_variables bloque_instrucciones
+
+  127 bloque_instrucciones: '{' uno_o_mas_instrucciones '}'
+
+  128 uno_o_mas_instrucciones: instruccion
+  129                        | uno_o_mas_instrucciones instruccion
+
+  130 instruccion: ';'
+  131            | instruccion_asignacion
+  132            | instruccion_salir
+  133            | instruccion_devolver
+  134            | instruccion_llamada
+  135            | instruccion_si
+  136            | instruccion_casos
+  137            | instruccion_bucle
+  138            | instruccion_probar_excepto
+  139            | instruccion_lanzar
+
+  140 instruccion_asignacion: objeto '=' expresion ';'
+
+  141 instruccion_salir: SALIR ';'
+  142                  | SALIR SI expresion ';'
+
+  143 instruccion_devolver: DEVOLVER expresion ';'
+  144                     | DEVOLVER ';'
+
+  145 instruccion_llamada: llamada_subprograma ';'
+
+  146 llamada_subprograma: nombre '(' cero_o_mas_expresiones ')'
+
+  147 instruccion_si: SI expresion ENTONCES bloque_instrucciones
+  148               | SI expresion ENTONCES bloque_instrucciones SINO bloque_instrucciones
+
+  149 instruccion_casos: EN CASO expresion ES uno_o_mas_casos ';'
+
+  150 uno_o_mas_casos: caso
+  151                | uno_o_mas_casos caso
+
+  152 caso: CUANDO entradas FLECHA_DOBLE bloque_instrucciones
+
+  153 entradas: entrada
+  154         | entradas '|' entrada
+
+  155 entrada: expresion
+  156        | rango
+  157        | OTRO
+
+  158 instruccion_bucle: clausula_iteracion bloque_instrucciones
+
+  159 clausula_iteracion: PARA nombre EN objeto
+  160                   | REPITE ELEMENTO nombre EN rango DESCENDENTE
+  161                   | REPITE ELEMENTO nombre EN rango
+  162                   | REPITE HASTA expresion
+  163                   | MIENTRAS expresion
+
+  164 instruccion_probar_excepto: PROBAR bloque_instrucciones EXCEPTO varias_clausula_excepcion
+  165                           | PROBAR bloque_instrucciones EXCEPTO varias_clausula_excepcion FINALMENTE bloque_instrucciones
+
+  166 varias_clausula_excepcion: clausula_excepcion
+  167                          | varias_clausula_excepcion clausula_excepcion
+
+  168 clausula_excepcion: CUANDO nombre EJECUTA bloque_instrucciones
+
+  169 instruccion_lanzar: LANZAR nombre ';'
+
+  170 cero_o_mas_expresiones: %empty
+  171                       | varias_expresion
+
+  172 varias_expresiones_constantes: expresion_constante
+  173                              | varias_expresiones_constantes ',' expresion_constante
+
+  174 varias_expresion: expresion
+  175                 | varias_expresion ',' expresion
+
+  176 expresion: expresion_logica
+
+  177 expresion_logica: expresion_logica OR expresion_logica1
+  178                 | expresion_logica1
+
+  179 expresion_logica1: expresion_logica1 AND expresion_logica2
+  180                  | expresion_logica2
+
+  181 expresion_logica2: '!' expresion_logica3
+  182                  | expresion_logica3
+
+  183 expresion_logica3: expresion_logica3 '<' expresion_logica4
+  184                  | expresion_logica3 '>' expresion_logica4
+  185                  | expresion_logica3 LEQ expresion_logica4
+  186                  | expresion_logica3 GEQ expresion_logica4
+  187                  | expresion_logica3 EQ expresion_logica4
+  188                  | expresion_logica3 NEQ expresion_logica4
+  189                  | expresion_logica4
+
+  190 expresion_logica4: expresion_logica4 '^' expresion_logica5
+  191                  | expresion_logica5
+
+  192 expresion_logica5: expresion_logica5 '@' expresion_logica6
+  193                  | expresion_logica6
+
+  194 expresion_logica6: expresion_logica6 '&' expresion_logica7
+  195                  | expresion_logica7
+
+  196 expresion_logica7: expresion_logica7 DESPI expresion_logica8
+  197                  | expresion_logica7 DESPD expresion_logica8
+  198                  | expresion_logica8
+
+  199 expresion_logica8: expresion_logica8 '+' expresion_logica9
+  200                  | expresion_logica8 '-' expresion_logica9
+  201                  | expresion_logica9
+
+  202 expresion_logica9: expresion_logica9 '*' expresion_logica10
+  203                  | expresion_logica9 '/' expresion_logica10
+  204                  | expresion_logica9 '%' expresion_logica10
+  205                  | expresion_logica10
+
+  206 expresion_logica10: expresion_logica11 POTENCIA expresion_logica10
+  207                   | expresion_logica11
+
+  208 expresion_logica11: '-' expresion_primaria
+  209                   | expresion_primaria
+
+  210 expresion_primaria: expresion_constante
+  211                   | '(' expresion ')'
+  212                   | llamada_subprograma
+  213                   | objeto
+
+  214 objeto: objeto '.' IDENTIFICADOR
+  215       | objeto '[' varias_expresion ']'
+  216       | nombre
+
+  217 expresion_constante: CTC_ENTERA
+  218                    | CTC_REAL
+  219                    | CTC_CADENA
+  220                    | CTC_CARACTER
+  221                    | CTC_BOOLEANA
+
+
+Terminales con las reglas donde aparecen
+
+$end (0) 0
+'!' (33) 181
+'%' (37) 204
+'&' (38) 194
+'(' (40) 18 19 41 82 121 146 211
+')' (41) 18 19 41 82 121 146 211
+'*' (42) 202
+'+' (43) 199
+',' (44) 5 15 51 60 66 69 104 173 175
+'-' (45) 200 208
+'.' (46) 214
+'/' (47) 203
+':' (58) 49 58 75 76 102 124 125
+';' (59) 3 9 13 24 49 58 75 76 79 80 98 99 102 123 130 140 141 142
+    143 144 145 149 169
+'<' (60) 183
+'=' (61) 24 25 58 76 140
+'>' (62) 184
+'@' (64) 192
+'[' (91) 43 62 63 64 215
+']' (93) 43 62 63 64 215
+'^' (94) 190
+'{' (123) 46 81 82 127
+'|' (124) 154
+'}' (125) 46 81 82 127
+error (256)
+ABSTRACTO (258) 106
+AND (259) 179
+ASOCIATIVA (260) 44
+BOOLEANO (261) 37
+CABECERA (262) 10
+CADENA (263) 39
+CASO (264) 149
+CARACTER (265) 38
+CARGA (266) 13
+CLASE (267) 81 82
+CONJUNTO (268) 45
+CONSTANTE (269) 55 101
+CUERPO (270) 11
+CTC_BOOLEANA (271) 221
+CTC_CADENA (272) 67 219
+CTC_CARACTER (273) 220
+CTC_ENTERA (274) 217
+CTC_REAL (275) 218
+CONSTRUCTOR (276) 118
+CUANDO (277) 152 168
+CUATRO_PTOS (278) 7
+DESCENDENTE (279) 160
+DESPD (280) 197
+DESPI (281) 196
+DESTRUCTOR (282) 119
+DE (283) 42 43 44 45
+DEVOLVER (284) 143 144
+DOS_PTOS (285) 52 53
+EJECUTA (286) 168
+ELEMENTO (287) 160 161
+EN (288) 17 19 149 159 160 161
+ENTERO (289) 35
+ENTONCES (290) 147 148
+EQ (291) 187
+ES (292) 149
+ESPECIFICO (293) 107
+EXCEPTO (294) 164 165
+FICHERO (295) 40
+FINAL (296) 84 108
+FINALMENTE (297) 165
+FLECHA_DOBLE (298) 67 70 116 152
+FUNCION (299) 116
+GEQ (300) 186
+GENERICO (301) 105
+HASTA (302) 162
+IDENTIFICADOR (303) 6 7 214
+INTERFAZ (304) 78
+LANZAR (305) 169
+LEQ (306) 185
+LISTA (307) 42 43 44
+MIENTRAS (308) 163
+MODIFICABLE (309) 125
+NEQ (310) 188
+OTRO (311) 157
+OR (312) 177
+PAQUETE (313) 9
+PARA (314) 159
+PATH (315) 17 19
+POTENCIA (316) 206
+PRIVADO (317) 92
+PROBAR (318) 164 165
+PROCEDIMIENTO (319) 117
+PROGRAMA (320) 3
+PUBLICO (321) 89
+REAL (322) 36
+REGISTRO (323) 46
+REPITE (324) 160 161 162
+SALIR (325) 141 142
+SEMIPUBLICO (326) 91
+SI (327) 142 147 148
+SINO (328) 148
+TIPO (329) 21 100
+VARIABLE (330) 72
+
+
+No terminales con las reglas donde aparecen
+
+$accept (99)
+    en la izquierda: 0
+programa (100)
+    en la izquierda: 1 2, en la derecha: 0
+definicion_programa (101)
+    en la izquierda: 3, en la derecha: 1
+uno_o_mas_nombres (102)
+    en la izquierda: 4 5, en la derecha: 5 18 19 49 75 76 82 102 124
+    125
+nombre (103)
+    en la izquierda: 6 7, en la derecha: 3 4 5 7 9 16 17 18 19 24 25
+    28 58 70 116 117 118 119 146 159 160 161 168 169 216
+bloque_programa (104)
+    en la izquierda: 8, en la derecha: 3
+definicion_paquete (105)
+    en la izquierda: 9, en la derecha: 2
+seccion_cabecera (106)
+    en la izquierda: 10, en la derecha: 9
+seccion_cuerpo (107)
+    en la izquierda: 11, en la derecha: 9
+declaracion_cargas (108)
+    en la izquierda: 12 13, en la derecha: 8 10
+multiple_declaracion_cargas (109)
+    en la izquierda: 14 15, en la derecha: 13 15
+declaracion_carga (110)
+    en la izquierda: 16 17 18 19, en la derecha: 14 15
+declaracion_tipos (111)
+    en la izquierda: 20 21, en la derecha: 8 10 11 126
+varias_declaracion_tipo (112)
+    en la izquierda: 22 23, en la derecha: 21 23
+declaracion_tipo (113)
+    en la izquierda: 24 25, en la derecha: 22 23 100
+tipo_estructurado (114)
+    en la izquierda: 26 27, en la derecha: 25
+tipo_no_estructurado_o_nombre_tipo (115)
+    en la izquierda: 28 29 30 31 32 33 34, en la derecha: 24 42 43
+    44 45 49 58 75 76 102 116 124 125
+tipo_escalar (116)
+    en la izquierda: 35 36 37 38 39, en la derecha: 29
+tipo_fichero (117)
+    en la izquierda: 40, en la derecha: 30
+tipo_enumerado (118)
+    en la izquierda: 41, en la derecha: 31
+tipo_lista (119)
+    en la izquierda: 42 43, en la derecha: 32
+tipo_lista_asociativa (120)
+    en la izquierda: 44, en la derecha: 33
+tipo_conjunto (121)
+    en la izquierda: 45, en la derecha: 34
+tipo_registro (122)
+    en la izquierda: 46, en la derecha: 26
+varias_declaraciones_campo (123)
+    en la izquierda: 47 48, en la derecha: 46 48
+declaracion_campo (124)
+    en la izquierda: 49, en la derecha: 47 48
+varios_rango (125)
+    en la izquierda: 50 51, en la derecha: 43 51
+rango (126)
+    en la izquierda: 52 53, en la derecha: 50 51 156 160 161
+declaracion_constantes (127)
+    en la izquierda: 54 55, en la derecha: 8 10 11 126
+varias_declaracion_constantes (128)
+    en la izquierda: 56 57, en la derecha: 55 57
+declaracion_constante (129)
+    en la izquierda: 58, en la derecha: 56 57 101
+valores_constantes (130)
+    en la izquierda: 59 60, en la derecha: 60 62
+valor_constante (131)
+    en la izquierda: 61 62 63 64, en la derecha: 58 59 60 67 70 76
+claves_valores (132)
+    en la izquierda: 65 66, en la derecha: 63 66
+clave_valor (133)
+    en la izquierda: 67, en la derecha: 65 66
+campos_valores (134)
+    en la izquierda: 68 69, en la derecha: 64 69
+campo_valor (135)
+    en la izquierda: 70, en la derecha: 68 69
+declaracion_variables (136)
+    en la izquierda: 71 72, en la derecha: 8 10 11 126
+varias_declaracion_variables (137)
+    en la izquierda: 73 74, en la derecha: 72 74
+declaracion_variable (138)
+    en la izquierda: 75 76, en la derecha: 73 74
+declaracion_interfaces (139)
+    en la izquierda: 77 78, en la derecha: 10
+varias_cabeceras_subprogramas (140)
+    en la izquierda: 79 80, en la derecha: 78 80
+declaracion_clase (141)
+    en la izquierda: 81 82, en la derecha: 27
+final (142)
+    en la izquierda: 83 84, en la derecha: 81 82
+ceroOuna_declaraciones_semi (143)
+    en la izquierda: 85 86, en la derecha: 81 82
+ceroOuna_declaraciones_privadas (144)
+    en la izquierda: 87 88, en la derecha: 81 82
+declaraciones_publicas (145)
+    en la izquierda: 89 90, en la derecha: 81 82
+declaraciones_semi (146)
+    en la izquierda: 91, en la derecha: 86
+declaraciones_privadas (147)
+    en la izquierda: 92, en la derecha: 88
+varias_declaraciones_componentes (148)
+    en la izquierda: 93 94, en la derecha: 89 90 91 92 94
+declaracion_componente (149)
+    en la izquierda: 95 96 97 98 99, en la derecha: 93 94
+declaracion_tipo_anidado (150)
+    en la izquierda: 100, en la derecha: 95
+declaracion_constante_anidada (151)
+    en la izquierda: 101, en la derecha: 96
+declaracion_atributos (152)
+    en la izquierda: 102, en la derecha: 97
+modificadores (153)
+    en la izquierda: 103 104, en la derecha: 99 104
+modificador (154)
+    en la izquierda: 105 106 107 108, en la derecha: 103 104
+declaraciones_subprogramas (155)
+    en la izquierda: 109 110, en la derecha: 11 110
+declaracion_subprograma (156)
+    en la izquierda: 111, en la derecha: 109 110
+cabecera_subprograma (157)
+    en la izquierda: 112 113 114 115, en la derecha: 79 80 98 99 111
+cabecera_funcion (158)
+    en la izquierda: 116, en la derecha: 112
+cabecera_procedimiento (159)
+    en la izquierda: 117, en la derecha: 113
+cabecera_constructor (160)
+    en la izquierda: 118, en la derecha: 114
+cabecera_destructor (161)
+    en la izquierda: 119, en la derecha: 115
+declaracion_parametros (162)
+    en la izquierda: 120 121, en la derecha: 116 117 118
+lista_parametros_formales (163)
+    en la izquierda: 122 123, en la derecha: 121 123
+parametros_formales (164)
+    en la izquierda: 124 125, en la derecha: 122 123
+bloque_subprograma (165)
+    en la izquierda: 126, en la derecha: 111
+bloque_instrucciones (166)
+    en la izquierda: 127, en la derecha: 8 126 147 148 152 158 164
+    165 168
+uno_o_mas_instrucciones (167)
+    en la izquierda: 128 129, en la derecha: 127 129
+instruccion (168)
+    en la izquierda: 130 131 132 133 134 135 136 137 138 139, en la derecha:
+    128 129
+instruccion_asignacion (169)
+    en la izquierda: 140, en la derecha: 131
+instruccion_salir (170)
+    en la izquierda: 141 142, en la derecha: 132
+instruccion_devolver (171)
+    en la izquierda: 143 144, en la derecha: 133
+instruccion_llamada (172)
+    en la izquierda: 145, en la derecha: 134
+llamada_subprograma (173)
+    en la izquierda: 146, en la derecha: 145 212
+instruccion_si (174)
+    en la izquierda: 147 148, en la derecha: 135
+instruccion_casos (175)
+    en la izquierda: 149, en la derecha: 136
+uno_o_mas_casos (176)
+    en la izquierda: 150 151, en la derecha: 149 151
+caso (177)
+    en la izquierda: 152, en la derecha: 150 151
+entradas (178)
+    en la izquierda: 153 154, en la derecha: 152 154
+entrada (179)
+    en la izquierda: 155 156 157, en la derecha: 153 154
+instruccion_bucle (180)
+    en la izquierda: 158, en la derecha: 137
+clausula_iteracion (181)
+    en la izquierda: 159 160 161 162 163, en la derecha: 158
+instruccion_probar_excepto (182)
+    en la izquierda: 164 165, en la derecha: 138
+varias_clausula_excepcion (183)
+    en la izquierda: 166 167, en la derecha: 164 165 167
+clausula_excepcion (184)
+    en la izquierda: 168, en la derecha: 166 167
+instruccion_lanzar (185)
+    en la izquierda: 169, en la derecha: 139
+cero_o_mas_expresiones (186)
+    en la izquierda: 170 171, en la derecha: 146
+varias_expresiones_constantes (187)
+    en la izquierda: 172 173, en la derecha: 41 173
+varias_expresion (188)
+    en la izquierda: 174 175, en la derecha: 171 175 215
+expresion (189)
+    en la izquierda: 176, en la derecha: 52 53 61 140 142 143 147 148
+    149 155 162 163 174 175 211
+expresion_logica (190)
+    en la izquierda: 177 178, en la derecha: 176 177
+expresion_logica1 (191)
+    en la izquierda: 179 180, en la derecha: 177 178 179
+expresion_logica2 (192)
+    en la izquierda: 181 182, en la derecha: 179 180
+expresion_logica3 (193)
+    en la izquierda: 183 184 185 186 187 188 189, en la derecha: 181
+    182 183 184 185 186 187 188
+expresion_logica4 (194)
+    en la izquierda: 190 191, en la derecha: 183 184 185 186 187 188
+    189 190
+expresion_logica5 (195)
+    en la izquierda: 192 193, en la derecha: 190 191 192
+expresion_logica6 (196)
+    en la izquierda: 194 195, en la derecha: 192 193 194
+expresion_logica7 (197)
+    en la izquierda: 196 197 198, en la derecha: 194 195 196 197
+expresion_logica8 (198)
+    en la izquierda: 199 200 201, en la derecha: 196 197 198 199 200
+expresion_logica9 (199)
+    en la izquierda: 202 203 204 205, en la derecha: 199 200 201 202
+    203 204
+expresion_logica10 (200)
+    en la izquierda: 206 207, en la derecha: 202 203 204 205 206
+expresion_logica11 (201)
+    en la izquierda: 208 209, en la derecha: 206 207
+expresion_primaria (202)
+    en la izquierda: 210 211 212 213, en la derecha: 208 209
+objeto (203)
+    en la izquierda: 214 215 216, en la derecha: 140 159 213 214 215
+expresion_constante (204)
+    en la izquierda: 217 218 219 220 221, en la derecha: 172 173 210
+
+
+Estado 0
+
+    0 $accept: . programa $end
+
+    PAQUETE   desplazar e ir al estado 1
+    PROGRAMA  desplazar e ir al estado 2
+
+    programa             ir al estado 3
+    definicion_programa  ir al estado 4
+    definicion_paquete   ir al estado 5
+
+
+Estado 1
+
+    9 definicion_paquete: PAQUETE . nombre ';' seccion_cabecera seccion_cuerpo
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    nombre  ir al estado 7
+
+
+Estado 2
+
+    3 definicion_programa: PROGRAMA . nombre ';' bloque_programa
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    nombre  ir al estado 8
+
+
+Estado 3
+
+    0 $accept: programa . $end
+
+    $end  desplazar e ir al estado 9
+
+
+Estado 4
+
+    1 programa: definicion_programa .
+
+    $default  reduce usando la regla 1 (programa)
+
+
+Estado 5
+
+    2 programa: definicion_paquete .
+
+    $default  reduce usando la regla 2 (programa)
+
+
+Estado 6
+
+    6 nombre: IDENTIFICADOR .
+
+    $default  reduce usando la regla 6 (nombre)
+
+
+Estado 7
+
+    7 nombre: nombre . CUATRO_PTOS IDENTIFICADOR
+    9 definicion_paquete: PAQUETE nombre . ';' seccion_cabecera seccion_cuerpo
+
+    CUATRO_PTOS  desplazar e ir al estado 10
+    ';'          desplazar e ir al estado 11
+
+
+Estado 8
+
+    3 definicion_programa: PROGRAMA nombre . ';' bloque_programa
+    7 nombre: nombre . CUATRO_PTOS IDENTIFICADOR
+
+    CUATRO_PTOS  desplazar e ir al estado 10
+    ';'          desplazar e ir al estado 12
+
+
+Estado 9
+
+    0 $accept: programa $end .
+
+    $default  aceptar
+
+
+Estado 10
+
+    7 nombre: nombre CUATRO_PTOS . IDENTIFICADOR
+
+    IDENTIFICADOR  desplazar e ir al estado 13
+
+
+Estado 11
+
+    9 definicion_paquete: PAQUETE nombre ';' . seccion_cabecera seccion_cuerpo
+
+    CABECERA  desplazar e ir al estado 14
+
+    seccion_cabecera  ir al estado 15
+
+
+Estado 12
+
+    3 definicion_programa: PROGRAMA nombre ';' . bloque_programa
+
+    CARGA  desplazar e ir al estado 16
+
+    $default  reduce usando la regla 12 (declaracion_cargas)
+
+    bloque_programa     ir al estado 17
+    declaracion_cargas  ir al estado 18
+
+
+Estado 13
+
+    7 nombre: nombre CUATRO_PTOS IDENTIFICADOR .
+
+    $default  reduce usando la regla 7 (nombre)
+
+
+Estado 14
+
+   10 seccion_cabecera: CABECERA . declaracion_cargas declaracion_tipos declaracion_constantes declaracion_variables declaracion_interfaces
+
+    CARGA  desplazar e ir al estado 16
+
+    $default  reduce usando la regla 12 (declaracion_cargas)
+
+    declaracion_cargas  ir al estado 19
+
+
+Estado 15
+
+    9 definicion_paquete: PAQUETE nombre ';' seccion_cabecera . seccion_cuerpo
+
+    CUERPO  desplazar e ir al estado 20
+
+    seccion_cuerpo  ir al estado 21
+
+
+Estado 16
+
+   13 declaracion_cargas: CARGA . multiple_declaracion_cargas ';'
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    nombre                       ir al estado 22
+    multiple_declaracion_cargas  ir al estado 23
+    declaracion_carga            ir al estado 24
+
+
+Estado 17
+
+    3 definicion_programa: PROGRAMA nombre ';' bloque_programa .
+
+    $default  reduce usando la regla 3 (definicion_programa)
+
+
+Estado 18
+
+    8 bloque_programa: declaracion_cargas . declaracion_tipos declaracion_constantes declaracion_variables bloque_instrucciones
+
+    TIPO  desplazar e ir al estado 25
+
+    $default  reduce usando la regla 20 (declaracion_tipos)
+
+    declaracion_tipos  ir al estado 26
+
+
+Estado 19
+
+   10 seccion_cabecera: CABECERA declaracion_cargas . declaracion_tipos declaracion_constantes declaracion_variables declaracion_interfaces
+
+    TIPO  desplazar e ir al estado 25
+
+    $default  reduce usando la regla 20 (declaracion_tipos)
+
+    declaracion_tipos  ir al estado 27
+
+
+Estado 20
+
+   11 seccion_cuerpo: CUERPO . declaracion_tipos declaracion_constantes declaracion_variables declaraciones_subprogramas
+
+    TIPO  desplazar e ir al estado 25
+
+    $default  reduce usando la regla 20 (declaracion_tipos)
+
+    declaracion_tipos  ir al estado 28
+
+
+Estado 21
+
+    9 definicion_paquete: PAQUETE nombre ';' seccion_cabecera seccion_cuerpo .
+
+    $default  reduce usando la regla 9 (definicion_paquete)
+
+
+Estado 22
+
+    7 nombre: nombre . CUATRO_PTOS IDENTIFICADOR
+   16 declaracion_carga: nombre .
+   17                  | nombre . EN PATH
+   18                  | nombre . '(' uno_o_mas_nombres ')'
+   19                  | nombre . EN PATH '(' uno_o_mas_nombres ')'
+
+    CUATRO_PTOS  desplazar e ir al estado 10
+    EN           desplazar e ir al estado 29
+    '('          desplazar e ir al estado 30
+
+    $default  reduce usando la regla 16 (declaracion_carga)
+
+
+Estado 23
+
+   13 declaracion_cargas: CARGA multiple_declaracion_cargas . ';'
+   15 multiple_declaracion_cargas: multiple_declaracion_cargas . ',' declaracion_carga
+
+    ';'  desplazar e ir al estado 31
+    ','  desplazar e ir al estado 32
+
+
+Estado 24
+
+   14 multiple_declaracion_cargas: declaracion_carga .
+
+    $default  reduce usando la regla 14 (multiple_declaracion_cargas)
+
+
+Estado 25
+
+   21 declaracion_tipos: TIPO . varias_declaracion_tipo
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    nombre                   ir al estado 33
+    varias_declaracion_tipo  ir al estado 34
+    declaracion_tipo         ir al estado 35
+
+
+Estado 26
+
+    8 bloque_programa: declaracion_cargas declaracion_tipos . declaracion_constantes declaracion_variables bloque_instrucciones
+
+    CONSTANTE  desplazar e ir al estado 36
+
+    $default  reduce usando la regla 54 (declaracion_constantes)
+
+    declaracion_constantes  ir al estado 37
+
+
+Estado 27
+
+   10 seccion_cabecera: CABECERA declaracion_cargas declaracion_tipos . declaracion_constantes declaracion_variables declaracion_interfaces
+
+    CONSTANTE  desplazar e ir al estado 36
+
+    $default  reduce usando la regla 54 (declaracion_constantes)
+
+    declaracion_constantes  ir al estado 38
+
+
+Estado 28
+
+   11 seccion_cuerpo: CUERPO declaracion_tipos . declaracion_constantes declaracion_variables declaraciones_subprogramas
+
+    CONSTANTE  desplazar e ir al estado 36
+
+    $default  reduce usando la regla 54 (declaracion_constantes)
+
+    declaracion_constantes  ir al estado 39
+
+
+Estado 29
+
+   17 declaracion_carga: nombre EN . PATH
+   19                  | nombre EN . PATH '(' uno_o_mas_nombres ')'
+
+    PATH  desplazar e ir al estado 40
+
+
+Estado 30
+
+   18 declaracion_carga: nombre '(' . uno_o_mas_nombres ')'
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    uno_o_mas_nombres  ir al estado 41
+    nombre             ir al estado 42
+
+
+Estado 31
+
+   13 declaracion_cargas: CARGA multiple_declaracion_cargas ';' .
+
+    $default  reduce usando la regla 13 (declaracion_cargas)
+
+
+Estado 32
+
+   15 multiple_declaracion_cargas: multiple_declaracion_cargas ',' . declaracion_carga
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    nombre             ir al estado 22
+    declaracion_carga  ir al estado 43
+
+
+Estado 33
+
+    7 nombre: nombre . CUATRO_PTOS IDENTIFICADOR
+   24 declaracion_tipo: nombre . '=' tipo_no_estructurado_o_nombre_tipo ';'
+   25                 | nombre . '=' tipo_estructurado
+
+    CUATRO_PTOS  desplazar e ir al estado 10
+    '='          desplazar e ir al estado 44
+
+
+Estado 34
+
+   21 declaracion_tipos: TIPO varias_declaracion_tipo .
+   23 varias_declaracion_tipo: varias_declaracion_tipo . declaracion_tipo
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    $default  reduce usando la regla 21 (declaracion_tipos)
+
+    nombre            ir al estado 33
+    declaracion_tipo  ir al estado 45
+
+
+Estado 35
+
+   22 varias_declaracion_tipo: declaracion_tipo .
+
+    $default  reduce usando la regla 22 (varias_declaracion_tipo)
+
+
+Estado 36
+
+   55 declaracion_constantes: CONSTANTE . varias_declaracion_constantes
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    nombre                         ir al estado 46
+    varias_declaracion_constantes  ir al estado 47
+    declaracion_constante          ir al estado 48
+
+
+Estado 37
+
+    8 bloque_programa: declaracion_cargas declaracion_tipos declaracion_constantes . declaracion_variables bloque_instrucciones
+
+    VARIABLE  desplazar e ir al estado 49
+
+    $default  reduce usando la regla 71 (declaracion_variables)
+
+    declaracion_variables  ir al estado 50
+
+
+Estado 38
+
+   10 seccion_cabecera: CABECERA declaracion_cargas declaracion_tipos declaracion_constantes . declaracion_variables declaracion_interfaces
+
+    VARIABLE  desplazar e ir al estado 49
+
+    $default  reduce usando la regla 71 (declaracion_variables)
+
+    declaracion_variables  ir al estado 51
+
+
+Estado 39
+
+   11 seccion_cuerpo: CUERPO declaracion_tipos declaracion_constantes . declaracion_variables declaraciones_subprogramas
+
+    VARIABLE  desplazar e ir al estado 49
+
+    $default  reduce usando la regla 71 (declaracion_variables)
+
+    declaracion_variables  ir al estado 52
+
+
+Estado 40
+
+   17 declaracion_carga: nombre EN PATH .
+   19                  | nombre EN PATH . '(' uno_o_mas_nombres ')'
+
+    '('  desplazar e ir al estado 53
+
+    $default  reduce usando la regla 17 (declaracion_carga)
+
+
+Estado 41
+
+    5 uno_o_mas_nombres: uno_o_mas_nombres . ',' nombre
+   18 declaracion_carga: nombre '(' uno_o_mas_nombres . ')'
+
+    ','  desplazar e ir al estado 54
+    ')'  desplazar e ir al estado 55
+
+
+Estado 42
+
+    4 uno_o_mas_nombres: nombre .
+    7 nombre: nombre . CUATRO_PTOS IDENTIFICADOR
+
+    CUATRO_PTOS  desplazar e ir al estado 10
+
+    $default  reduce usando la regla 4 (uno_o_mas_nombres)
+
+
+Estado 43
+
+   15 multiple_declaracion_cargas: multiple_declaracion_cargas ',' declaracion_carga .
+
+    $default  reduce usando la regla 15 (multiple_declaracion_cargas)
+
+
+Estado 44
+
+   24 declaracion_tipo: nombre '=' . tipo_no_estructurado_o_nombre_tipo ';'
+   25                 | nombre '=' . tipo_estructurado
+
+    BOOLEANO       desplazar e ir al estado 56
+    CADENA         desplazar e ir al estado 57
+    CARACTER       desplazar e ir al estado 58
+    CLASE          desplazar e ir al estado 59
+    CONJUNTO       desplazar e ir al estado 60
+    ENTERO         desplazar e ir al estado 61
+    FICHERO        desplazar e ir al estado 62
+    IDENTIFICADOR  desplazar e ir al estado 6
+    LISTA          desplazar e ir al estado 63
+    REAL           desplazar e ir al estado 64
+    REGISTRO       desplazar e ir al estado 65
+    '('            desplazar e ir al estado 66
+
+    nombre                              ir al estado 67
+    tipo_estructurado                   ir al estado 68
+    tipo_no_estructurado_o_nombre_tipo  ir al estado 69
+    tipo_escalar                        ir al estado 70
+    tipo_fichero                        ir al estado 71
+    tipo_enumerado                      ir al estado 72
+    tipo_lista                          ir al estado 73
+    tipo_lista_asociativa               ir al estado 74
+    tipo_conjunto                       ir al estado 75
+    tipo_registro                       ir al estado 76
+    declaracion_clase                   ir al estado 77
+
+
+Estado 45
+
+   23 varias_declaracion_tipo: varias_declaracion_tipo declaracion_tipo .
+
+    $default  reduce usando la regla 23 (varias_declaracion_tipo)
+
+
+Estado 46
+
+    7 nombre: nombre . CUATRO_PTOS IDENTIFICADOR
+   58 declaracion_constante: nombre . ':' tipo_no_estructurado_o_nombre_tipo '=' valor_constante ';'
+
+    CUATRO_PTOS  desplazar e ir al estado 10
+    ':'          desplazar e ir al estado 78
+
+
+Estado 47
+
+   55 declaracion_constantes: CONSTANTE varias_declaracion_constantes .
+   57 varias_declaracion_constantes: varias_declaracion_constantes . declaracion_constante
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    $default  reduce usando la regla 55 (declaracion_constantes)
+
+    nombre                 ir al estado 46
+    declaracion_constante  ir al estado 79
+
+
+Estado 48
+
+   56 varias_declaracion_constantes: declaracion_constante .
+
+    $default  reduce usando la regla 56 (varias_declaracion_constantes)
+
+
+Estado 49
+
+   72 declaracion_variables: VARIABLE . varias_declaracion_variables
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    uno_o_mas_nombres             ir al estado 80
+    nombre                        ir al estado 42
+    varias_declaracion_variables  ir al estado 81
+    declaracion_variable          ir al estado 82
+
+
+Estado 50
+
+    8 bloque_programa: declaracion_cargas declaracion_tipos declaracion_constantes declaracion_variables . bloque_instrucciones
+
+    '{'  desplazar e ir al estado 83
+
+    bloque_instrucciones  ir al estado 84
+
+
+Estado 51
+
+   10 seccion_cabecera: CABECERA declaracion_cargas declaracion_tipos declaracion_constantes declaracion_variables . declaracion_interfaces
+
+    INTERFAZ  desplazar e ir al estado 85
+
+    $default  reduce usando la regla 77 (declaracion_interfaces)
+
+    declaracion_interfaces  ir al estado 86
+
+
+Estado 52
+
+   11 seccion_cuerpo: CUERPO declaracion_tipos declaracion_constantes declaracion_variables . declaraciones_subprogramas
+
+    CONSTRUCTOR    desplazar e ir al estado 87
+    DESTRUCTOR     desplazar e ir al estado 88
+    FUNCION        desplazar e ir al estado 89
+    PROCEDIMIENTO  desplazar e ir al estado 90
+
+    declaraciones_subprogramas  ir al estado 91
+    declaracion_subprograma     ir al estado 92
+    cabecera_subprograma        ir al estado 93
+    cabecera_funcion            ir al estado 94
+    cabecera_procedimiento      ir al estado 95
+    cabecera_constructor        ir al estado 96
+    cabecera_destructor         ir al estado 97
+
+
+Estado 53
+
+   19 declaracion_carga: nombre EN PATH '(' . uno_o_mas_nombres ')'
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    uno_o_mas_nombres  ir al estado 98
+    nombre             ir al estado 42
+
+
+Estado 54
+
+    5 uno_o_mas_nombres: uno_o_mas_nombres ',' . nombre
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    nombre  ir al estado 99
+
+
+Estado 55
+
+   18 declaracion_carga: nombre '(' uno_o_mas_nombres ')' .
+
+    $default  reduce usando la regla 18 (declaracion_carga)
+
+
+Estado 56
+
+   37 tipo_escalar: BOOLEANO .
+
+    $default  reduce usando la regla 37 (tipo_escalar)
+
+
+Estado 57
+
+   39 tipo_escalar: CADENA .
+
+    $default  reduce usando la regla 39 (tipo_escalar)
+
+
+Estado 58
+
+   38 tipo_escalar: CARACTER .
+
+    $default  reduce usando la regla 38 (tipo_escalar)
+
+
+Estado 59
+
+   81 declaracion_clase: CLASE . final '{' declaraciones_publicas ceroOuna_declaraciones_semi ceroOuna_declaraciones_privadas '}'
+   82                  | CLASE . final '(' uno_o_mas_nombres ')' '{' declaraciones_publicas ceroOuna_declaraciones_semi ceroOuna_declaraciones_privadas '}'
+
+    FINAL  desplazar e ir al estado 100
+
+    $default  reduce usando la regla 83 (final)
+
+    final  ir al estado 101
+
+
+Estado 60
+
+   45 tipo_conjunto: CONJUNTO . DE tipo_no_estructurado_o_nombre_tipo
+
+    DE  desplazar e ir al estado 102
+
+
+Estado 61
+
+   35 tipo_escalar: ENTERO .
+
+    $default  reduce usando la regla 35 (tipo_escalar)
+
+
+Estado 62
+
+   40 tipo_fichero: FICHERO .
+
+    $default  reduce usando la regla 40 (tipo_fichero)
+
+
+Estado 63
+
+   42 tipo_lista: LISTA . DE tipo_no_estructurado_o_nombre_tipo
+   43           | LISTA . '[' varios_rango ']' DE tipo_no_estructurado_o_nombre_tipo
+   44 tipo_lista_asociativa: LISTA . ASOCIATIVA DE tipo_no_estructurado_o_nombre_tipo
+
+    ASOCIATIVA  desplazar e ir al estado 103
+    DE          desplazar e ir al estado 104
+    '['         desplazar e ir al estado 105
+
+
+Estado 64
+
+   36 tipo_escalar: REAL .
+
+    $default  reduce usando la regla 36 (tipo_escalar)
+
+
+Estado 65
+
+   46 tipo_registro: REGISTRO . '{' varias_declaraciones_campo '}'
+
+    '{'  desplazar e ir al estado 106
+
+
+Estado 66
+
+   41 tipo_enumerado: '(' . varias_expresiones_constantes ')'
+
+    CTC_BOOLEANA  desplazar e ir al estado 107
+    CTC_CADENA    desplazar e ir al estado 108
+    CTC_CARACTER  desplazar e ir al estado 109
+    CTC_ENTERA    desplazar e ir al estado 110
+    CTC_REAL      desplazar e ir al estado 111
+
+    varias_expresiones_constantes  ir al estado 112
+    expresion_constante            ir al estado 113
+
+
+Estado 67
+
+    7 nombre: nombre . CUATRO_PTOS IDENTIFICADOR
+   28 tipo_no_estructurado_o_nombre_tipo: nombre .
+
+    CUATRO_PTOS  desplazar e ir al estado 10
+
+    $default  reduce usando la regla 28 (tipo_no_estructurado_o_nombre_tipo)
+
+
+Estado 68
+
+   25 declaracion_tipo: nombre '=' tipo_estructurado .
+
+    $default  reduce usando la regla 25 (declaracion_tipo)
+
+
+Estado 69
+
+   24 declaracion_tipo: nombre '=' tipo_no_estructurado_o_nombre_tipo . ';'
+
+    ';'  desplazar e ir al estado 114
+
+
+Estado 70
+
+   29 tipo_no_estructurado_o_nombre_tipo: tipo_escalar .
+
+    $default  reduce usando la regla 29 (tipo_no_estructurado_o_nombre_tipo)
+
+
+Estado 71
+
+   30 tipo_no_estructurado_o_nombre_tipo: tipo_fichero .
+
+    $default  reduce usando la regla 30 (tipo_no_estructurado_o_nombre_tipo)
+
+
+Estado 72
+
+   31 tipo_no_estructurado_o_nombre_tipo: tipo_enumerado .
+
+    $default  reduce usando la regla 31 (tipo_no_estructurado_o_nombre_tipo)
+
+
+Estado 73
+
+   32 tipo_no_estructurado_o_nombre_tipo: tipo_lista .
+
+    $default  reduce usando la regla 32 (tipo_no_estructurado_o_nombre_tipo)
+
+
+Estado 74
+
+   33 tipo_no_estructurado_o_nombre_tipo: tipo_lista_asociativa .
+
+    $default  reduce usando la regla 33 (tipo_no_estructurado_o_nombre_tipo)
+
+
+Estado 75
+
+   34 tipo_no_estructurado_o_nombre_tipo: tipo_conjunto .
+
+    $default  reduce usando la regla 34 (tipo_no_estructurado_o_nombre_tipo)
+
+
+Estado 76
+
+   26 tipo_estructurado: tipo_registro .
+
+    $default  reduce usando la regla 26 (tipo_estructurado)
+
+
+Estado 77
+
+   27 tipo_estructurado: declaracion_clase .
+
+    $default  reduce usando la regla 27 (tipo_estructurado)
+
+
+Estado 78
+
+   58 declaracion_constante: nombre ':' . tipo_no_estructurado_o_nombre_tipo '=' valor_constante ';'
+
+    BOOLEANO       desplazar e ir al estado 56
+    CADENA         desplazar e ir al estado 57
+    CARACTER       desplazar e ir al estado 58
+    CONJUNTO       desplazar e ir al estado 60
+    ENTERO         desplazar e ir al estado 61
+    FICHERO        desplazar e ir al estado 62
+    IDENTIFICADOR  desplazar e ir al estado 6
+    LISTA          desplazar e ir al estado 63
+    REAL           desplazar e ir al estado 64
+    '('            desplazar e ir al estado 66
+
+    nombre                              ir al estado 67
+    tipo_no_estructurado_o_nombre_tipo  ir al estado 115
+    tipo_escalar                        ir al estado 70
+    tipo_fichero                        ir al estado 71
+    tipo_enumerado                      ir al estado 72
+    tipo_lista                          ir al estado 73
+    tipo_lista_asociativa               ir al estado 74
+    tipo_conjunto                       ir al estado 75
+
+
+Estado 79
+
+   57 varias_declaracion_constantes: varias_declaracion_constantes declaracion_constante .
+
+    $default  reduce usando la regla 57 (varias_declaracion_constantes)
+
+
+Estado 80
+
+    5 uno_o_mas_nombres: uno_o_mas_nombres . ',' nombre
+   75 declaracion_variable: uno_o_mas_nombres . ':' tipo_no_estructurado_o_nombre_tipo ';'
+   76                     | uno_o_mas_nombres . ':' tipo_no_estructurado_o_nombre_tipo '=' valor_constante ';'
+
+    ','  desplazar e ir al estado 54
+    ':'  desplazar e ir al estado 116
+
+
+Estado 81
+
+   72 declaracion_variables: VARIABLE varias_declaracion_variables .
+   74 varias_declaracion_variables: varias_declaracion_variables . declaracion_variable
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    $default  reduce usando la regla 72 (declaracion_variables)
+
+    uno_o_mas_nombres     ir al estado 80
+    nombre                ir al estado 42
+    declaracion_variable  ir al estado 117
+
+
+Estado 82
+
+   73 varias_declaracion_variables: declaracion_variable .
+
+    $default  reduce usando la regla 73 (varias_declaracion_variables)
+
+
+Estado 83
+
+  127 bloque_instrucciones: '{' . uno_o_mas_instrucciones '}'
+
+    DEVOLVER       desplazar e ir al estado 118
+    EN             desplazar e ir al estado 119
+    IDENTIFICADOR  desplazar e ir al estado 6
+    LANZAR         desplazar e ir al estado 120
+    MIENTRAS       desplazar e ir al estado 121
+    PARA           desplazar e ir al estado 122
+    PROBAR         desplazar e ir al estado 123
+    REPITE         desplazar e ir al estado 124
+    SALIR          desplazar e ir al estado 125
+    SI             desplazar e ir al estado 126
+    ';'            desplazar e ir al estado 127
+
+    nombre                      ir al estado 128
+    uno_o_mas_instrucciones     ir al estado 129
+    instruccion                 ir al estado 130
+    instruccion_asignacion      ir al estado 131
+    instruccion_salir           ir al estado 132
+    instruccion_devolver        ir al estado 133
+    instruccion_llamada         ir al estado 134
+    llamada_subprograma         ir al estado 135
+    instruccion_si              ir al estado 136
+    instruccion_casos           ir al estado 137
+    instruccion_bucle           ir al estado 138
+    clausula_iteracion          ir al estado 139
+    instruccion_probar_excepto  ir al estado 140
+    instruccion_lanzar          ir al estado 141
+    objeto                      ir al estado 142
+
+
+Estado 84
+
+    8 bloque_programa: declaracion_cargas declaracion_tipos declaracion_constantes declaracion_variables bloque_instrucciones .
+
+    $default  reduce usando la regla 8 (bloque_programa)
+
+
+Estado 85
+
+   78 declaracion_interfaces: INTERFAZ . varias_cabeceras_subprogramas
+
+    CONSTRUCTOR    desplazar e ir al estado 87
+    DESTRUCTOR     desplazar e ir al estado 88
+    FUNCION        desplazar e ir al estado 89
+    PROCEDIMIENTO  desplazar e ir al estado 90
+
+    varias_cabeceras_subprogramas  ir al estado 143
+    cabecera_subprograma           ir al estado 144
+    cabecera_funcion               ir al estado 94
+    cabecera_procedimiento         ir al estado 95
+    cabecera_constructor           ir al estado 96
+    cabecera_destructor            ir al estado 97
+
+
+Estado 86
+
+   10 seccion_cabecera: CABECERA declaracion_cargas declaracion_tipos declaracion_constantes declaracion_variables declaracion_interfaces .
+
+    $default  reduce usando la regla 10 (seccion_cabecera)
+
+
+Estado 87
+
+  118 cabecera_constructor: CONSTRUCTOR . nombre declaracion_parametros
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    nombre  ir al estado 145
+
+
+Estado 88
+
+  119 cabecera_destructor: DESTRUCTOR . nombre
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    nombre  ir al estado 146
+
+
+Estado 89
+
+  116 cabecera_funcion: FUNCION . nombre declaracion_parametros FLECHA_DOBLE tipo_no_estructurado_o_nombre_tipo
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    nombre  ir al estado 147
+
+
+Estado 90
+
+  117 cabecera_procedimiento: PROCEDIMIENTO . nombre declaracion_parametros
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    nombre  ir al estado 148
+
+
+Estado 91
+
+   11 seccion_cuerpo: CUERPO declaracion_tipos declaracion_constantes declaracion_variables declaraciones_subprogramas .
+  110 declaraciones_subprogramas: declaraciones_subprogramas . declaracion_subprograma
+
+    CONSTRUCTOR    desplazar e ir al estado 87
+    DESTRUCTOR     desplazar e ir al estado 88
+    FUNCION        desplazar e ir al estado 89
+    PROCEDIMIENTO  desplazar e ir al estado 90
+
+    $default  reduce usando la regla 11 (seccion_cuerpo)
+
+    declaracion_subprograma  ir al estado 149
+    cabecera_subprograma     ir al estado 93
+    cabecera_funcion         ir al estado 94
+    cabecera_procedimiento   ir al estado 95
+    cabecera_constructor     ir al estado 96
+    cabecera_destructor      ir al estado 97
+
+
+Estado 92
+
+  109 declaraciones_subprogramas: declaracion_subprograma .
+
+    $default  reduce usando la regla 109 (declaraciones_subprogramas)
+
+
+Estado 93
+
+  111 declaracion_subprograma: cabecera_subprograma . bloque_subprograma
+
+    TIPO  desplazar e ir al estado 25
+
+    $default  reduce usando la regla 20 (declaracion_tipos)
+
+    declaracion_tipos   ir al estado 150
+    bloque_subprograma  ir al estado 151
+
+
+Estado 94
+
+  112 cabecera_subprograma: cabecera_funcion .
+
+    $default  reduce usando la regla 112 (cabecera_subprograma)
+
+
+Estado 95
+
+  113 cabecera_subprograma: cabecera_procedimiento .
+
+    $default  reduce usando la regla 113 (cabecera_subprograma)
+
+
+Estado 96
+
+  114 cabecera_subprograma: cabecera_constructor .
+
+    $default  reduce usando la regla 114 (cabecera_subprograma)
+
+
+Estado 97
+
+  115 cabecera_subprograma: cabecera_destructor .
+
+    $default  reduce usando la regla 115 (cabecera_subprograma)
+
+
+Estado 98
+
+    5 uno_o_mas_nombres: uno_o_mas_nombres . ',' nombre
+   19 declaracion_carga: nombre EN PATH '(' uno_o_mas_nombres . ')'
+
+    ','  desplazar e ir al estado 54
+    ')'  desplazar e ir al estado 152
+
+
+Estado 99
+
+    5 uno_o_mas_nombres: uno_o_mas_nombres ',' nombre .
+    7 nombre: nombre . CUATRO_PTOS IDENTIFICADOR
+
+    CUATRO_PTOS  desplazar e ir al estado 10
+
+    $default  reduce usando la regla 5 (uno_o_mas_nombres)
+
+
+Estado 100
+
+   84 final: FINAL .
+
+    $default  reduce usando la regla 84 (final)
+
+
+Estado 101
+
+   81 declaracion_clase: CLASE final . '{' declaraciones_publicas ceroOuna_declaraciones_semi ceroOuna_declaraciones_privadas '}'
+   82                  | CLASE final . '(' uno_o_mas_nombres ')' '{' declaraciones_publicas ceroOuna_declaraciones_semi ceroOuna_declaraciones_privadas '}'
+
+    '('  desplazar e ir al estado 153
+    '{'  desplazar e ir al estado 154
+
+
+Estado 102
+
+   45 tipo_conjunto: CONJUNTO DE . tipo_no_estructurado_o_nombre_tipo
+
+    BOOLEANO       desplazar e ir al estado 56
+    CADENA         desplazar e ir al estado 57
+    CARACTER       desplazar e ir al estado 58
+    CONJUNTO       desplazar e ir al estado 60
+    ENTERO         desplazar e ir al estado 61
+    FICHERO        desplazar e ir al estado 62
+    IDENTIFICADOR  desplazar e ir al estado 6
+    LISTA          desplazar e ir al estado 63
+    REAL           desplazar e ir al estado 64
+    '('            desplazar e ir al estado 66
+
+    nombre                              ir al estado 67
+    tipo_no_estructurado_o_nombre_tipo  ir al estado 155
+    tipo_escalar                        ir al estado 70
+    tipo_fichero                        ir al estado 71
+    tipo_enumerado                      ir al estado 72
+    tipo_lista                          ir al estado 73
+    tipo_lista_asociativa               ir al estado 74
+    tipo_conjunto                       ir al estado 75
+
+
+Estado 103
+
+   44 tipo_lista_asociativa: LISTA ASOCIATIVA . DE tipo_no_estructurado_o_nombre_tipo
+
+    DE  desplazar e ir al estado 156
+
+
+Estado 104
+
+   42 tipo_lista: LISTA DE . tipo_no_estructurado_o_nombre_tipo
+
+    BOOLEANO       desplazar e ir al estado 56
+    CADENA         desplazar e ir al estado 57
+    CARACTER       desplazar e ir al estado 58
+    CONJUNTO       desplazar e ir al estado 60
+    ENTERO         desplazar e ir al estado 61
+    FICHERO        desplazar e ir al estado 62
+    IDENTIFICADOR  desplazar e ir al estado 6
+    LISTA          desplazar e ir al estado 63
+    REAL           desplazar e ir al estado 64
+    '('            desplazar e ir al estado 66
+
+    nombre                              ir al estado 67
+    tipo_no_estructurado_o_nombre_tipo  ir al estado 157
+    tipo_escalar                        ir al estado 70
+    tipo_fichero                        ir al estado 71
+    tipo_enumerado                      ir al estado 72
+    tipo_lista                          ir al estado 73
+    tipo_lista_asociativa               ir al estado 74
+    tipo_conjunto                       ir al estado 75
+
+
+Estado 105
+
+   43 tipo_lista: LISTA '[' . varios_rango ']' DE tipo_no_estructurado_o_nombre_tipo
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '!'            desplazar e ir al estado 159
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    varios_rango         ir al estado 161
+    rango                ir al estado 162
+    llamada_subprograma  ir al estado 163
+    expresion            ir al estado 164
+    expresion_logica     ir al estado 165
+    expresion_logica1    ir al estado 166
+    expresion_logica2    ir al estado 167
+    expresion_logica3    ir al estado 168
+    expresion_logica4    ir al estado 169
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 106
+
+   46 tipo_registro: REGISTRO '{' . varias_declaraciones_campo '}'
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    uno_o_mas_nombres           ir al estado 180
+    nombre                      ir al estado 42
+    varias_declaraciones_campo  ir al estado 181
+    declaracion_campo           ir al estado 182
+
+
+Estado 107
+
+  221 expresion_constante: CTC_BOOLEANA .
+
+    $default  reduce usando la regla 221 (expresion_constante)
+
+
+Estado 108
+
+  219 expresion_constante: CTC_CADENA .
+
+    $default  reduce usando la regla 219 (expresion_constante)
+
+
+Estado 109
+
+  220 expresion_constante: CTC_CARACTER .
+
+    $default  reduce usando la regla 220 (expresion_constante)
+
+
+Estado 110
+
+  217 expresion_constante: CTC_ENTERA .
+
+    $default  reduce usando la regla 217 (expresion_constante)
+
+
+Estado 111
+
+  218 expresion_constante: CTC_REAL .
+
+    $default  reduce usando la regla 218 (expresion_constante)
+
+
+Estado 112
+
+   41 tipo_enumerado: '(' varias_expresiones_constantes . ')'
+  173 varias_expresiones_constantes: varias_expresiones_constantes . ',' expresion_constante
+
+    ','  desplazar e ir al estado 183
+    ')'  desplazar e ir al estado 184
+
+
+Estado 113
+
+  172 varias_expresiones_constantes: expresion_constante .
+
+    $default  reduce usando la regla 172 (varias_expresiones_constantes)
+
+
+Estado 114
+
+   24 declaracion_tipo: nombre '=' tipo_no_estructurado_o_nombre_tipo ';' .
+
+    $default  reduce usando la regla 24 (declaracion_tipo)
+
+
+Estado 115
+
+   58 declaracion_constante: nombre ':' tipo_no_estructurado_o_nombre_tipo . '=' valor_constante ';'
+
+    '='  desplazar e ir al estado 185
+
+
+Estado 116
+
+   75 declaracion_variable: uno_o_mas_nombres ':' . tipo_no_estructurado_o_nombre_tipo ';'
+   76                     | uno_o_mas_nombres ':' . tipo_no_estructurado_o_nombre_tipo '=' valor_constante ';'
+
+    BOOLEANO       desplazar e ir al estado 56
+    CADENA         desplazar e ir al estado 57
+    CARACTER       desplazar e ir al estado 58
+    CONJUNTO       desplazar e ir al estado 60
+    ENTERO         desplazar e ir al estado 61
+    FICHERO        desplazar e ir al estado 62
+    IDENTIFICADOR  desplazar e ir al estado 6
+    LISTA          desplazar e ir al estado 63
+    REAL           desplazar e ir al estado 64
+    '('            desplazar e ir al estado 66
+
+    nombre                              ir al estado 67
+    tipo_no_estructurado_o_nombre_tipo  ir al estado 186
+    tipo_escalar                        ir al estado 70
+    tipo_fichero                        ir al estado 71
+    tipo_enumerado                      ir al estado 72
+    tipo_lista                          ir al estado 73
+    tipo_lista_asociativa               ir al estado 74
+    tipo_conjunto                       ir al estado 75
+
+
+Estado 117
+
+   74 varias_declaracion_variables: varias_declaracion_variables declaracion_variable .
+
+    $default  reduce usando la regla 74 (varias_declaracion_variables)
+
+
+Estado 118
+
+  143 instruccion_devolver: DEVOLVER . expresion ';'
+  144                     | DEVOLVER . ';'
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    ';'            desplazar e ir al estado 187
+    '('            desplazar e ir al estado 158
+    '!'            desplazar e ir al estado 159
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion            ir al estado 188
+    expresion_logica     ir al estado 165
+    expresion_logica1    ir al estado 166
+    expresion_logica2    ir al estado 167
+    expresion_logica3    ir al estado 168
+    expresion_logica4    ir al estado 169
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 119
+
+  149 instruccion_casos: EN . CASO expresion ES uno_o_mas_casos ';'
+
+    CASO  desplazar e ir al estado 189
+
+
+Estado 120
+
+  169 instruccion_lanzar: LANZAR . nombre ';'
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    nombre  ir al estado 190
+
+
+Estado 121
+
+  163 clausula_iteracion: MIENTRAS . expresion
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '!'            desplazar e ir al estado 159
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion            ir al estado 191
+    expresion_logica     ir al estado 165
+    expresion_logica1    ir al estado 166
+    expresion_logica2    ir al estado 167
+    expresion_logica3    ir al estado 168
+    expresion_logica4    ir al estado 169
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 122
+
+  159 clausula_iteracion: PARA . nombre EN objeto
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    nombre  ir al estado 192
+
+
+Estado 123
+
+  164 instruccion_probar_excepto: PROBAR . bloque_instrucciones EXCEPTO varias_clausula_excepcion
+  165                           | PROBAR . bloque_instrucciones EXCEPTO varias_clausula_excepcion FINALMENTE bloque_instrucciones
+
+    '{'  desplazar e ir al estado 83
+
+    bloque_instrucciones  ir al estado 193
+
+
+Estado 124
+
+  160 clausula_iteracion: REPITE . ELEMENTO nombre EN rango DESCENDENTE
+  161                   | REPITE . ELEMENTO nombre EN rango
+  162                   | REPITE . HASTA expresion
+
+    ELEMENTO  desplazar e ir al estado 194
+    HASTA     desplazar e ir al estado 195
+
+
+Estado 125
+
+  141 instruccion_salir: SALIR . ';'
+  142                  | SALIR . SI expresion ';'
+
+    SI   desplazar e ir al estado 196
+    ';'  desplazar e ir al estado 197
+
+
+Estado 126
+
+  147 instruccion_si: SI . expresion ENTONCES bloque_instrucciones
+  148               | SI . expresion ENTONCES bloque_instrucciones SINO bloque_instrucciones
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '!'            desplazar e ir al estado 159
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion            ir al estado 198
+    expresion_logica     ir al estado 165
+    expresion_logica1    ir al estado 166
+    expresion_logica2    ir al estado 167
+    expresion_logica3    ir al estado 168
+    expresion_logica4    ir al estado 169
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 127
+
+  130 instruccion: ';' .
+
+    $default  reduce usando la regla 130 (instruccion)
+
+
+Estado 128
+
+    7 nombre: nombre . CUATRO_PTOS IDENTIFICADOR
+  146 llamada_subprograma: nombre . '(' cero_o_mas_expresiones ')'
+  216 objeto: nombre .
+
+    CUATRO_PTOS  desplazar e ir al estado 10
+    '('          desplazar e ir al estado 199
+
+    $default  reduce usando la regla 216 (objeto)
+
+
+Estado 129
+
+  127 bloque_instrucciones: '{' uno_o_mas_instrucciones . '}'
+  129 uno_o_mas_instrucciones: uno_o_mas_instrucciones . instruccion
+
+    DEVOLVER       desplazar e ir al estado 118
+    EN             desplazar e ir al estado 119
+    IDENTIFICADOR  desplazar e ir al estado 6
+    LANZAR         desplazar e ir al estado 120
+    MIENTRAS       desplazar e ir al estado 121
+    PARA           desplazar e ir al estado 122
+    PROBAR         desplazar e ir al estado 123
+    REPITE         desplazar e ir al estado 124
+    SALIR          desplazar e ir al estado 125
+    SI             desplazar e ir al estado 126
+    ';'            desplazar e ir al estado 127
+    '}'            desplazar e ir al estado 200
+
+    nombre                      ir al estado 128
+    instruccion                 ir al estado 201
+    instruccion_asignacion      ir al estado 131
+    instruccion_salir           ir al estado 132
+    instruccion_devolver        ir al estado 133
+    instruccion_llamada         ir al estado 134
+    llamada_subprograma         ir al estado 135
+    instruccion_si              ir al estado 136
+    instruccion_casos           ir al estado 137
+    instruccion_bucle           ir al estado 138
+    clausula_iteracion          ir al estado 139
+    instruccion_probar_excepto  ir al estado 140
+    instruccion_lanzar          ir al estado 141
+    objeto                      ir al estado 142
+
+
+Estado 130
+
+  128 uno_o_mas_instrucciones: instruccion .
+
+    $default  reduce usando la regla 128 (uno_o_mas_instrucciones)
+
+
+Estado 131
+
+  131 instruccion: instruccion_asignacion .
+
+    $default  reduce usando la regla 131 (instruccion)
+
+
+Estado 132
+
+  132 instruccion: instruccion_salir .
+
+    $default  reduce usando la regla 132 (instruccion)
+
+
+Estado 133
+
+  133 instruccion: instruccion_devolver .
+
+    $default  reduce usando la regla 133 (instruccion)
+
+
+Estado 134
+
+  134 instruccion: instruccion_llamada .
+
+    $default  reduce usando la regla 134 (instruccion)
+
+
+Estado 135
+
+  145 instruccion_llamada: llamada_subprograma . ';'
+
+    ';'  desplazar e ir al estado 202
+
+
+Estado 136
+
+  135 instruccion: instruccion_si .
+
+    $default  reduce usando la regla 135 (instruccion)
+
+
+Estado 137
+
+  136 instruccion: instruccion_casos .
+
+    $default  reduce usando la regla 136 (instruccion)
+
+
+Estado 138
+
+  137 instruccion: instruccion_bucle .
+
+    $default  reduce usando la regla 137 (instruccion)
+
+
+Estado 139
+
+  158 instruccion_bucle: clausula_iteracion . bloque_instrucciones
+
+    '{'  desplazar e ir al estado 83
+
+    bloque_instrucciones  ir al estado 203
+
+
+Estado 140
+
+  138 instruccion: instruccion_probar_excepto .
+
+    $default  reduce usando la regla 138 (instruccion)
+
+
+Estado 141
+
+  139 instruccion: instruccion_lanzar .
+
+    $default  reduce usando la regla 139 (instruccion)
+
+
+Estado 142
+
+  140 instruccion_asignacion: objeto . '=' expresion ';'
+  214 objeto: objeto . '.' IDENTIFICADOR
+  215       | objeto . '[' varias_expresion ']'
+
+    '='  desplazar e ir al estado 204
+    '['  desplazar e ir al estado 205
+    '.'  desplazar e ir al estado 206
+
+
+Estado 143
+
+   78 declaracion_interfaces: INTERFAZ varias_cabeceras_subprogramas .
+   80 varias_cabeceras_subprogramas: varias_cabeceras_subprogramas . cabecera_subprograma ';'
+
+    CONSTRUCTOR    desplazar e ir al estado 87
+    DESTRUCTOR     desplazar e ir al estado 88
+    FUNCION        desplazar e ir al estado 89
+    PROCEDIMIENTO  desplazar e ir al estado 90
+
+    $default  reduce usando la regla 78 (declaracion_interfaces)
+
+    cabecera_subprograma    ir al estado 207
+    cabecera_funcion        ir al estado 94
+    cabecera_procedimiento  ir al estado 95
+    cabecera_constructor    ir al estado 96
+    cabecera_destructor     ir al estado 97
+
+
+Estado 144
+
+   79 varias_cabeceras_subprogramas: cabecera_subprograma . ';'
+
+    ';'  desplazar e ir al estado 208
+
+
+Estado 145
+
+    7 nombre: nombre . CUATRO_PTOS IDENTIFICADOR
+  118 cabecera_constructor: CONSTRUCTOR nombre . declaracion_parametros
+
+    CUATRO_PTOS  desplazar e ir al estado 10
+    '('          desplazar e ir al estado 209
+
+    $default  reduce usando la regla 120 (declaracion_parametros)
+
+    declaracion_parametros  ir al estado 210
+
+
+Estado 146
+
+    7 nombre: nombre . CUATRO_PTOS IDENTIFICADOR
+  119 cabecera_destructor: DESTRUCTOR nombre .
+
+    CUATRO_PTOS  desplazar e ir al estado 10
+
+    $default  reduce usando la regla 119 (cabecera_destructor)
+
+
+Estado 147
+
+    7 nombre: nombre . CUATRO_PTOS IDENTIFICADOR
+  116 cabecera_funcion: FUNCION nombre . declaracion_parametros FLECHA_DOBLE tipo_no_estructurado_o_nombre_tipo
+
+    CUATRO_PTOS  desplazar e ir al estado 10
+    '('          desplazar e ir al estado 209
+
+    $default  reduce usando la regla 120 (declaracion_parametros)
+
+    declaracion_parametros  ir al estado 211
+
+
+Estado 148
+
+    7 nombre: nombre . CUATRO_PTOS IDENTIFICADOR
+  117 cabecera_procedimiento: PROCEDIMIENTO nombre . declaracion_parametros
+
+    CUATRO_PTOS  desplazar e ir al estado 10
+    '('          desplazar e ir al estado 209
+
+    $default  reduce usando la regla 120 (declaracion_parametros)
+
+    declaracion_parametros  ir al estado 212
+
+
+Estado 149
+
+  110 declaraciones_subprogramas: declaraciones_subprogramas declaracion_subprograma .
+
+    $default  reduce usando la regla 110 (declaraciones_subprogramas)
+
+
+Estado 150
+
+  126 bloque_subprograma: declaracion_tipos . declaracion_constantes declaracion_variables bloque_instrucciones
+
+    CONSTANTE  desplazar e ir al estado 36
+
+    $default  reduce usando la regla 54 (declaracion_constantes)
+
+    declaracion_constantes  ir al estado 213
+
+
+Estado 151
+
+  111 declaracion_subprograma: cabecera_subprograma bloque_subprograma .
+
+    $default  reduce usando la regla 111 (declaracion_subprograma)
+
+
+Estado 152
+
+   19 declaracion_carga: nombre EN PATH '(' uno_o_mas_nombres ')' .
+
+    $default  reduce usando la regla 19 (declaracion_carga)
+
+
+Estado 153
+
+   82 declaracion_clase: CLASE final '(' . uno_o_mas_nombres ')' '{' declaraciones_publicas ceroOuna_declaraciones_semi ceroOuna_declaraciones_privadas '}'
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    uno_o_mas_nombres  ir al estado 214
+    nombre             ir al estado 42
+
+
+Estado 154
+
+   81 declaracion_clase: CLASE final '{' . declaraciones_publicas ceroOuna_declaraciones_semi ceroOuna_declaraciones_privadas '}'
+
+    CONSTANTE      desplazar e ir al estado 215
+    CONSTRUCTOR    desplazar e ir al estado 87
+    DESTRUCTOR     desplazar e ir al estado 88
+    FUNCION        desplazar e ir al estado 89
+    IDENTIFICADOR  desplazar e ir al estado 6
+    PROCEDIMIENTO  desplazar e ir al estado 90
+    PUBLICO        desplazar e ir al estado 216
+    TIPO           desplazar e ir al estado 217
+
+    uno_o_mas_nombres                 ir al estado 218
+    nombre                            ir al estado 42
+    declaraciones_publicas            ir al estado 219
+    varias_declaraciones_componentes  ir al estado 220
+    declaracion_componente            ir al estado 221
+    declaracion_tipo_anidado          ir al estado 222
+    declaracion_constante_anidada     ir al estado 223
+    declaracion_atributos             ir al estado 224
+    cabecera_subprograma              ir al estado 225
+    cabecera_funcion                  ir al estado 94
+    cabecera_procedimiento            ir al estado 95
+    cabecera_constructor              ir al estado 96
+    cabecera_destructor               ir al estado 97
+
+
+Estado 155
+
+   45 tipo_conjunto: CONJUNTO DE tipo_no_estructurado_o_nombre_tipo .
+
+    $default  reduce usando la regla 45 (tipo_conjunto)
+
+
+Estado 156
+
+   44 tipo_lista_asociativa: LISTA ASOCIATIVA DE . tipo_no_estructurado_o_nombre_tipo
+
+    BOOLEANO       desplazar e ir al estado 56
+    CADENA         desplazar e ir al estado 57
+    CARACTER       desplazar e ir al estado 58
+    CONJUNTO       desplazar e ir al estado 60
+    ENTERO         desplazar e ir al estado 61
+    FICHERO        desplazar e ir al estado 62
+    IDENTIFICADOR  desplazar e ir al estado 6
+    LISTA          desplazar e ir al estado 63
+    REAL           desplazar e ir al estado 64
+    '('            desplazar e ir al estado 66
+
+    nombre                              ir al estado 67
+    tipo_no_estructurado_o_nombre_tipo  ir al estado 226
+    tipo_escalar                        ir al estado 70
+    tipo_fichero                        ir al estado 71
+    tipo_enumerado                      ir al estado 72
+    tipo_lista                          ir al estado 73
+    tipo_lista_asociativa               ir al estado 74
+    tipo_conjunto                       ir al estado 75
+
+
+Estado 157
+
+   42 tipo_lista: LISTA DE tipo_no_estructurado_o_nombre_tipo .
+
+    $default  reduce usando la regla 42 (tipo_lista)
+
+
+Estado 158
+
+  211 expresion_primaria: '(' . expresion ')'
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '!'            desplazar e ir al estado 159
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion            ir al estado 227
+    expresion_logica     ir al estado 165
+    expresion_logica1    ir al estado 166
+    expresion_logica2    ir al estado 167
+    expresion_logica3    ir al estado 168
+    expresion_logica4    ir al estado 169
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 159
+
+  181 expresion_logica2: '!' . expresion_logica3
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion_logica3    ir al estado 228
+    expresion_logica4    ir al estado 169
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 160
+
+  208 expresion_logica11: '-' . expresion_primaria
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion_primaria   ir al estado 229
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 161
+
+   43 tipo_lista: LISTA '[' varios_rango . ']' DE tipo_no_estructurado_o_nombre_tipo
+   51 varios_rango: varios_rango . ',' rango
+
+    ','  desplazar e ir al estado 230
+    ']'  desplazar e ir al estado 231
+
+
+Estado 162
+
+   50 varios_rango: rango .
+
+    $default  reduce usando la regla 50 (varios_rango)
+
+
+Estado 163
+
+  212 expresion_primaria: llamada_subprograma .
+
+    $default  reduce usando la regla 212 (expresion_primaria)
+
+
+Estado 164
+
+   52 rango: expresion . DOS_PTOS expresion
+   53      | expresion . DOS_PTOS expresion DOS_PTOS expresion
+
+    DOS_PTOS  desplazar e ir al estado 232
+
+
+Estado 165
+
+  176 expresion: expresion_logica .
+  177 expresion_logica: expresion_logica . OR expresion_logica1
+
+    OR  desplazar e ir al estado 233
+
+    $default  reduce usando la regla 176 (expresion)
+
+
+Estado 166
+
+  178 expresion_logica: expresion_logica1 .
+  179 expresion_logica1: expresion_logica1 . AND expresion_logica2
+
+    AND  desplazar e ir al estado 234
+
+    $default  reduce usando la regla 178 (expresion_logica)
+
+
+Estado 167
+
+  180 expresion_logica1: expresion_logica2 .
+
+    $default  reduce usando la regla 180 (expresion_logica1)
+
+
+Estado 168
+
+  182 expresion_logica2: expresion_logica3 .
+  183 expresion_logica3: expresion_logica3 . '<' expresion_logica4
+  184                  | expresion_logica3 . '>' expresion_logica4
+  185                  | expresion_logica3 . LEQ expresion_logica4
+  186                  | expresion_logica3 . GEQ expresion_logica4
+  187                  | expresion_logica3 . EQ expresion_logica4
+  188                  | expresion_logica3 . NEQ expresion_logica4
+
+    EQ   desplazar e ir al estado 235
+    GEQ  desplazar e ir al estado 236
+    LEQ  desplazar e ir al estado 237
+    NEQ  desplazar e ir al estado 238
+    '<'  desplazar e ir al estado 239
+    '>'  desplazar e ir al estado 240
+
+    $default  reduce usando la regla 182 (expresion_logica2)
+
+
+Estado 169
+
+  189 expresion_logica3: expresion_logica4 .
+  190 expresion_logica4: expresion_logica4 . '^' expresion_logica5
+
+    '^'  desplazar e ir al estado 241
+
+    $default  reduce usando la regla 189 (expresion_logica3)
+
+
+Estado 170
+
+  191 expresion_logica4: expresion_logica5 .
+  192 expresion_logica5: expresion_logica5 . '@' expresion_logica6
+
+    '@'  desplazar e ir al estado 242
+
+    $default  reduce usando la regla 191 (expresion_logica4)
+
+
+Estado 171
+
+  193 expresion_logica5: expresion_logica6 .
+  194 expresion_logica6: expresion_logica6 . '&' expresion_logica7
+
+    '&'  desplazar e ir al estado 243
+
+    $default  reduce usando la regla 193 (expresion_logica5)
+
+
+Estado 172
+
+  195 expresion_logica6: expresion_logica7 .
+  196 expresion_logica7: expresion_logica7 . DESPI expresion_logica8
+  197                  | expresion_logica7 . DESPD expresion_logica8
+
+    DESPD  desplazar e ir al estado 244
+    DESPI  desplazar e ir al estado 245
+
+    $default  reduce usando la regla 195 (expresion_logica6)
+
+
+Estado 173
+
+  198 expresion_logica7: expresion_logica8 .
+  199 expresion_logica8: expresion_logica8 . '+' expresion_logica9
+  200                  | expresion_logica8 . '-' expresion_logica9
+
+    '+'  desplazar e ir al estado 246
+    '-'  desplazar e ir al estado 247
+
+    $default  reduce usando la regla 198 (expresion_logica7)
+
+
+Estado 174
+
+  201 expresion_logica8: expresion_logica9 .
+  202 expresion_logica9: expresion_logica9 . '*' expresion_logica10
+  203                  | expresion_logica9 . '/' expresion_logica10
+  204                  | expresion_logica9 . '%' expresion_logica10
+
+    '*'  desplazar e ir al estado 248
+    '/'  desplazar e ir al estado 249
+    '%'  desplazar e ir al estado 250
+
+    $default  reduce usando la regla 201 (expresion_logica8)
+
+
+Estado 175
+
+  205 expresion_logica9: expresion_logica10 .
+
+    $default  reduce usando la regla 205 (expresion_logica9)
+
+
+Estado 176
+
+  206 expresion_logica10: expresion_logica11 . POTENCIA expresion_logica10
+  207                   | expresion_logica11 .
+
+    POTENCIA  desplazar e ir al estado 251
+
+    $default  reduce usando la regla 207 (expresion_logica10)
+
+
+Estado 177
+
+  209 expresion_logica11: expresion_primaria .
+
+    $default  reduce usando la regla 209 (expresion_logica11)
+
+
+Estado 178
+
+  213 expresion_primaria: objeto .
+  214 objeto: objeto . '.' IDENTIFICADOR
+  215       | objeto . '[' varias_expresion ']'
+
+    '['  desplazar e ir al estado 205
+    '.'  desplazar e ir al estado 206
+
+    $default  reduce usando la regla 213 (expresion_primaria)
+
+
+Estado 179
+
+  210 expresion_primaria: expresion_constante .
+
+    $default  reduce usando la regla 210 (expresion_primaria)
+
+
+Estado 180
+
+    5 uno_o_mas_nombres: uno_o_mas_nombres . ',' nombre
+   49 declaracion_campo: uno_o_mas_nombres . ':' tipo_no_estructurado_o_nombre_tipo ';'
+
+    ','  desplazar e ir al estado 54
+    ':'  desplazar e ir al estado 252
+
+
+Estado 181
+
+   46 tipo_registro: REGISTRO '{' varias_declaraciones_campo . '}'
+   48 varias_declaraciones_campo: varias_declaraciones_campo . declaracion_campo
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '}'            desplazar e ir al estado 253
+
+    uno_o_mas_nombres  ir al estado 180
+    nombre             ir al estado 42
+    declaracion_campo  ir al estado 254
+
+
+Estado 182
+
+   47 varias_declaraciones_campo: declaracion_campo .
+
+    $default  reduce usando la regla 47 (varias_declaraciones_campo)
+
+
+Estado 183
+
+  173 varias_expresiones_constantes: varias_expresiones_constantes ',' . expresion_constante
+
+    CTC_BOOLEANA  desplazar e ir al estado 107
+    CTC_CADENA    desplazar e ir al estado 108
+    CTC_CARACTER  desplazar e ir al estado 109
+    CTC_ENTERA    desplazar e ir al estado 110
+    CTC_REAL      desplazar e ir al estado 111
+
+    expresion_constante  ir al estado 255
+
+
+Estado 184
+
+   41 tipo_enumerado: '(' varias_expresiones_constantes ')' .
+
+    $default  reduce usando la regla 41 (tipo_enumerado)
+
+
+Estado 185
+
+   58 declaracion_constante: nombre ':' tipo_no_estructurado_o_nombre_tipo '=' . valor_constante ';'
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '['            desplazar e ir al estado 256
+    '!'            desplazar e ir al estado 159
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    valor_constante      ir al estado 257
+    llamada_subprograma  ir al estado 163
+    expresion            ir al estado 258
+    expresion_logica     ir al estado 165
+    expresion_logica1    ir al estado 166
+    expresion_logica2    ir al estado 167
+    expresion_logica3    ir al estado 168
+    expresion_logica4    ir al estado 169
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 186
+
+   75 declaracion_variable: uno_o_mas_nombres ':' tipo_no_estructurado_o_nombre_tipo . ';'
+   76                     | uno_o_mas_nombres ':' tipo_no_estructurado_o_nombre_tipo . '=' valor_constante ';'
+
+    ';'  desplazar e ir al estado 259
+    '='  desplazar e ir al estado 260
+
+
+Estado 187
+
+  144 instruccion_devolver: DEVOLVER ';' .
+
+    $default  reduce usando la regla 144 (instruccion_devolver)
+
+
+Estado 188
+
+  143 instruccion_devolver: DEVOLVER expresion . ';'
+
+    ';'  desplazar e ir al estado 261
+
+
+Estado 189
+
+  149 instruccion_casos: EN CASO . expresion ES uno_o_mas_casos ';'
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '!'            desplazar e ir al estado 159
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion            ir al estado 262
+    expresion_logica     ir al estado 165
+    expresion_logica1    ir al estado 166
+    expresion_logica2    ir al estado 167
+    expresion_logica3    ir al estado 168
+    expresion_logica4    ir al estado 169
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 190
+
+    7 nombre: nombre . CUATRO_PTOS IDENTIFICADOR
+  169 instruccion_lanzar: LANZAR nombre . ';'
+
+    CUATRO_PTOS  desplazar e ir al estado 10
+    ';'          desplazar e ir al estado 263
+
+
+Estado 191
+
+  163 clausula_iteracion: MIENTRAS expresion .
+
+    $default  reduce usando la regla 163 (clausula_iteracion)
+
+
+Estado 192
+
+    7 nombre: nombre . CUATRO_PTOS IDENTIFICADOR
+  159 clausula_iteracion: PARA nombre . EN objeto
+
+    CUATRO_PTOS  desplazar e ir al estado 10
+    EN           desplazar e ir al estado 264
+
+
+Estado 193
+
+  164 instruccion_probar_excepto: PROBAR bloque_instrucciones . EXCEPTO varias_clausula_excepcion
+  165                           | PROBAR bloque_instrucciones . EXCEPTO varias_clausula_excepcion FINALMENTE bloque_instrucciones
+
+    EXCEPTO  desplazar e ir al estado 265
+
+
+Estado 194
+
+  160 clausula_iteracion: REPITE ELEMENTO . nombre EN rango DESCENDENTE
+  161                   | REPITE ELEMENTO . nombre EN rango
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    nombre  ir al estado 266
+
+
+Estado 195
+
+  162 clausula_iteracion: REPITE HASTA . expresion
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '!'            desplazar e ir al estado 159
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion            ir al estado 267
+    expresion_logica     ir al estado 165
+    expresion_logica1    ir al estado 166
+    expresion_logica2    ir al estado 167
+    expresion_logica3    ir al estado 168
+    expresion_logica4    ir al estado 169
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 196
+
+  142 instruccion_salir: SALIR SI . expresion ';'
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '!'            desplazar e ir al estado 159
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion            ir al estado 268
+    expresion_logica     ir al estado 165
+    expresion_logica1    ir al estado 166
+    expresion_logica2    ir al estado 167
+    expresion_logica3    ir al estado 168
+    expresion_logica4    ir al estado 169
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 197
+
+  141 instruccion_salir: SALIR ';' .
+
+    $default  reduce usando la regla 141 (instruccion_salir)
+
+
+Estado 198
+
+  147 instruccion_si: SI expresion . ENTONCES bloque_instrucciones
+  148               | SI expresion . ENTONCES bloque_instrucciones SINO bloque_instrucciones
+
+    ENTONCES  desplazar e ir al estado 269
+
+
+Estado 199
+
+  146 llamada_subprograma: nombre '(' . cero_o_mas_expresiones ')'
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '!'            desplazar e ir al estado 159
+    '-'            desplazar e ir al estado 160
+
+    $default  reduce usando la regla 170 (cero_o_mas_expresiones)
+
+    nombre                  ir al estado 128
+    llamada_subprograma     ir al estado 163
+    cero_o_mas_expresiones  ir al estado 270
+    varias_expresion        ir al estado 271
+    expresion               ir al estado 272
+    expresion_logica        ir al estado 165
+    expresion_logica1       ir al estado 166
+    expresion_logica2       ir al estado 167
+    expresion_logica3       ir al estado 168
+    expresion_logica4       ir al estado 169
+    expresion_logica5       ir al estado 170
+    expresion_logica6       ir al estado 171
+    expresion_logica7       ir al estado 172
+    expresion_logica8       ir al estado 173
+    expresion_logica9       ir al estado 174
+    expresion_logica10      ir al estado 175
+    expresion_logica11      ir al estado 176
+    expresion_primaria      ir al estado 177
+    objeto                  ir al estado 178
+    expresion_constante     ir al estado 179
+
+
+Estado 200
+
+  127 bloque_instrucciones: '{' uno_o_mas_instrucciones '}' .
+
+    $default  reduce usando la regla 127 (bloque_instrucciones)
+
+
+Estado 201
+
+  129 uno_o_mas_instrucciones: uno_o_mas_instrucciones instruccion .
+
+    $default  reduce usando la regla 129 (uno_o_mas_instrucciones)
+
+
+Estado 202
+
+  145 instruccion_llamada: llamada_subprograma ';' .
+
+    $default  reduce usando la regla 145 (instruccion_llamada)
+
+
+Estado 203
+
+  158 instruccion_bucle: clausula_iteracion bloque_instrucciones .
+
+    $default  reduce usando la regla 158 (instruccion_bucle)
+
+
+Estado 204
+
+  140 instruccion_asignacion: objeto '=' . expresion ';'
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '!'            desplazar e ir al estado 159
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion            ir al estado 273
+    expresion_logica     ir al estado 165
+    expresion_logica1    ir al estado 166
+    expresion_logica2    ir al estado 167
+    expresion_logica3    ir al estado 168
+    expresion_logica4    ir al estado 169
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 205
+
+  215 objeto: objeto '[' . varias_expresion ']'
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '!'            desplazar e ir al estado 159
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    varias_expresion     ir al estado 274
+    expresion            ir al estado 272
+    expresion_logica     ir al estado 165
+    expresion_logica1    ir al estado 166
+    expresion_logica2    ir al estado 167
+    expresion_logica3    ir al estado 168
+    expresion_logica4    ir al estado 169
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 206
+
+  214 objeto: objeto '.' . IDENTIFICADOR
+
+    IDENTIFICADOR  desplazar e ir al estado 275
+
+
+Estado 207
+
+   80 varias_cabeceras_subprogramas: varias_cabeceras_subprogramas cabecera_subprograma . ';'
+
+    ';'  desplazar e ir al estado 276
+
+
+Estado 208
+
+   79 varias_cabeceras_subprogramas: cabecera_subprograma ';' .
+
+    $default  reduce usando la regla 79 (varias_cabeceras_subprogramas)
+
+
+Estado 209
+
+  121 declaracion_parametros: '(' . lista_parametros_formales ')'
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    uno_o_mas_nombres          ir al estado 277
+    nombre                     ir al estado 42
+    lista_parametros_formales  ir al estado 278
+    parametros_formales        ir al estado 279
+
+
+Estado 210
+
+  118 cabecera_constructor: CONSTRUCTOR nombre declaracion_parametros .
+
+    $default  reduce usando la regla 118 (cabecera_constructor)
+
+
+Estado 211
+
+  116 cabecera_funcion: FUNCION nombre declaracion_parametros . FLECHA_DOBLE tipo_no_estructurado_o_nombre_tipo
+
+    FLECHA_DOBLE  desplazar e ir al estado 280
+
+
+Estado 212
+
+  117 cabecera_procedimiento: PROCEDIMIENTO nombre declaracion_parametros .
+
+    $default  reduce usando la regla 117 (cabecera_procedimiento)
+
+
+Estado 213
+
+  126 bloque_subprograma: declaracion_tipos declaracion_constantes . declaracion_variables bloque_instrucciones
+
+    VARIABLE  desplazar e ir al estado 49
+
+    $default  reduce usando la regla 71 (declaracion_variables)
+
+    declaracion_variables  ir al estado 281
+
+
+Estado 214
+
+    5 uno_o_mas_nombres: uno_o_mas_nombres . ',' nombre
+   82 declaracion_clase: CLASE final '(' uno_o_mas_nombres . ')' '{' declaraciones_publicas ceroOuna_declaraciones_semi ceroOuna_declaraciones_privadas '}'
+
+    ','  desplazar e ir al estado 54
+    ')'  desplazar e ir al estado 282
+
+
+Estado 215
+
+  101 declaracion_constante_anidada: CONSTANTE . declaracion_constante
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    nombre                 ir al estado 46
+    declaracion_constante  ir al estado 283
+
+
+Estado 216
+
+   89 declaraciones_publicas: PUBLICO . varias_declaraciones_componentes
+
+    CONSTANTE      desplazar e ir al estado 215
+    CONSTRUCTOR    desplazar e ir al estado 87
+    DESTRUCTOR     desplazar e ir al estado 88
+    FUNCION        desplazar e ir al estado 89
+    IDENTIFICADOR  desplazar e ir al estado 6
+    PROCEDIMIENTO  desplazar e ir al estado 90
+    TIPO           desplazar e ir al estado 217
+
+    uno_o_mas_nombres                 ir al estado 218
+    nombre                            ir al estado 42
+    varias_declaraciones_componentes  ir al estado 284
+    declaracion_componente            ir al estado 221
+    declaracion_tipo_anidado          ir al estado 222
+    declaracion_constante_anidada     ir al estado 223
+    declaracion_atributos             ir al estado 224
+    cabecera_subprograma              ir al estado 225
+    cabecera_funcion                  ir al estado 94
+    cabecera_procedimiento            ir al estado 95
+    cabecera_constructor              ir al estado 96
+    cabecera_destructor               ir al estado 97
+
+
+Estado 217
+
+  100 declaracion_tipo_anidado: TIPO . declaracion_tipo
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    nombre            ir al estado 33
+    declaracion_tipo  ir al estado 285
+
+
+Estado 218
+
+    5 uno_o_mas_nombres: uno_o_mas_nombres . ',' nombre
+  102 declaracion_atributos: uno_o_mas_nombres . ':' tipo_no_estructurado_o_nombre_tipo ';'
+
+    ','  desplazar e ir al estado 54
+    ':'  desplazar e ir al estado 286
+
+
+Estado 219
+
+   81 declaracion_clase: CLASE final '{' declaraciones_publicas . ceroOuna_declaraciones_semi ceroOuna_declaraciones_privadas '}'
+
+    SEMIPUBLICO  desplazar e ir al estado 287
+
+    $default  reduce usando la regla 85 (ceroOuna_declaraciones_semi)
+
+    ceroOuna_declaraciones_semi  ir al estado 288
+    declaraciones_semi           ir al estado 289
+
+
+Estado 220
+
+   90 declaraciones_publicas: varias_declaraciones_componentes .
+   94 varias_declaraciones_componentes: varias_declaraciones_componentes . declaracion_componente
+
+    CONSTANTE      desplazar e ir al estado 215
+    CONSTRUCTOR    desplazar e ir al estado 87
+    DESTRUCTOR     desplazar e ir al estado 88
+    FUNCION        desplazar e ir al estado 89
+    IDENTIFICADOR  desplazar e ir al estado 6
+    PROCEDIMIENTO  desplazar e ir al estado 90
+    TIPO           desplazar e ir al estado 217
+
+    $default  reduce usando la regla 90 (declaraciones_publicas)
+
+    uno_o_mas_nombres              ir al estado 218
+    nombre                         ir al estado 42
+    declaracion_componente         ir al estado 290
+    declaracion_tipo_anidado       ir al estado 222
+    declaracion_constante_anidada  ir al estado 223
+    declaracion_atributos          ir al estado 224
+    cabecera_subprograma           ir al estado 225
+    cabecera_funcion               ir al estado 94
+    cabecera_procedimiento         ir al estado 95
+    cabecera_constructor           ir al estado 96
+    cabecera_destructor            ir al estado 97
+
+
+Estado 221
+
+   93 varias_declaraciones_componentes: declaracion_componente .
+
+    $default  reduce usando la regla 93 (varias_declaraciones_componentes)
+
+
+Estado 222
+
+   95 declaracion_componente: declaracion_tipo_anidado .
+
+    $default  reduce usando la regla 95 (declaracion_componente)
+
+
+Estado 223
+
+   96 declaracion_componente: declaracion_constante_anidada .
+
+    $default  reduce usando la regla 96 (declaracion_componente)
+
+
+Estado 224
+
+   97 declaracion_componente: declaracion_atributos .
+
+    $default  reduce usando la regla 97 (declaracion_componente)
+
+
+Estado 225
+
+   98 declaracion_componente: cabecera_subprograma . ';'
+   99                       | cabecera_subprograma . ';' modificadores ';'
+
+    ';'  desplazar e ir al estado 291
+
+
+Estado 226
+
+   44 tipo_lista_asociativa: LISTA ASOCIATIVA DE tipo_no_estructurado_o_nombre_tipo .
+
+    $default  reduce usando la regla 44 (tipo_lista_asociativa)
+
+
+Estado 227
+
+  211 expresion_primaria: '(' expresion . ')'
+
+    ')'  desplazar e ir al estado 292
+
+
+Estado 228
+
+  181 expresion_logica2: '!' expresion_logica3 .
+  183 expresion_logica3: expresion_logica3 . '<' expresion_logica4
+  184                  | expresion_logica3 . '>' expresion_logica4
+  185                  | expresion_logica3 . LEQ expresion_logica4
+  186                  | expresion_logica3 . GEQ expresion_logica4
+  187                  | expresion_logica3 . EQ expresion_logica4
+  188                  | expresion_logica3 . NEQ expresion_logica4
+
+    EQ   desplazar e ir al estado 235
+    GEQ  desplazar e ir al estado 236
+    LEQ  desplazar e ir al estado 237
+    NEQ  desplazar e ir al estado 238
+    '<'  desplazar e ir al estado 239
+    '>'  desplazar e ir al estado 240
+
+    $default  reduce usando la regla 181 (expresion_logica2)
+
+
+Estado 229
+
+  208 expresion_logica11: '-' expresion_primaria .
+
+    $default  reduce usando la regla 208 (expresion_logica11)
+
+
+Estado 230
+
+   51 varios_rango: varios_rango ',' . rango
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '!'            desplazar e ir al estado 159
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    rango                ir al estado 293
+    llamada_subprograma  ir al estado 163
+    expresion            ir al estado 164
+    expresion_logica     ir al estado 165
+    expresion_logica1    ir al estado 166
+    expresion_logica2    ir al estado 167
+    expresion_logica3    ir al estado 168
+    expresion_logica4    ir al estado 169
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 231
+
+   43 tipo_lista: LISTA '[' varios_rango ']' . DE tipo_no_estructurado_o_nombre_tipo
+
+    DE  desplazar e ir al estado 294
+
+
+Estado 232
+
+   52 rango: expresion DOS_PTOS . expresion
+   53      | expresion DOS_PTOS . expresion DOS_PTOS expresion
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '!'            desplazar e ir al estado 159
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion            ir al estado 295
+    expresion_logica     ir al estado 165
+    expresion_logica1    ir al estado 166
+    expresion_logica2    ir al estado 167
+    expresion_logica3    ir al estado 168
+    expresion_logica4    ir al estado 169
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 233
+
+  177 expresion_logica: expresion_logica OR . expresion_logica1
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '!'            desplazar e ir al estado 159
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion_logica1    ir al estado 296
+    expresion_logica2    ir al estado 167
+    expresion_logica3    ir al estado 168
+    expresion_logica4    ir al estado 169
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 234
+
+  179 expresion_logica1: expresion_logica1 AND . expresion_logica2
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '!'            desplazar e ir al estado 159
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion_logica2    ir al estado 297
+    expresion_logica3    ir al estado 168
+    expresion_logica4    ir al estado 169
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 235
+
+  187 expresion_logica3: expresion_logica3 EQ . expresion_logica4
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion_logica4    ir al estado 298
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 236
+
+  186 expresion_logica3: expresion_logica3 GEQ . expresion_logica4
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion_logica4    ir al estado 299
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 237
+
+  185 expresion_logica3: expresion_logica3 LEQ . expresion_logica4
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion_logica4    ir al estado 300
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 238
+
+  188 expresion_logica3: expresion_logica3 NEQ . expresion_logica4
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion_logica4    ir al estado 301
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 239
+
+  183 expresion_logica3: expresion_logica3 '<' . expresion_logica4
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion_logica4    ir al estado 302
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 240
+
+  184 expresion_logica3: expresion_logica3 '>' . expresion_logica4
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion_logica4    ir al estado 303
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 241
+
+  190 expresion_logica4: expresion_logica4 '^' . expresion_logica5
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion_logica5    ir al estado 304
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 242
+
+  192 expresion_logica5: expresion_logica5 '@' . expresion_logica6
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion_logica6    ir al estado 305
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 243
+
+  194 expresion_logica6: expresion_logica6 '&' . expresion_logica7
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion_logica7    ir al estado 306
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 244
+
+  197 expresion_logica7: expresion_logica7 DESPD . expresion_logica8
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion_logica8    ir al estado 307
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 245
+
+  196 expresion_logica7: expresion_logica7 DESPI . expresion_logica8
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion_logica8    ir al estado 308
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 246
+
+  199 expresion_logica8: expresion_logica8 '+' . expresion_logica9
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion_logica9    ir al estado 309
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 247
+
+  200 expresion_logica8: expresion_logica8 '-' . expresion_logica9
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion_logica9    ir al estado 310
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 248
+
+  202 expresion_logica9: expresion_logica9 '*' . expresion_logica10
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion_logica10   ir al estado 311
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 249
+
+  203 expresion_logica9: expresion_logica9 '/' . expresion_logica10
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion_logica10   ir al estado 312
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 250
+
+  204 expresion_logica9: expresion_logica9 '%' . expresion_logica10
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion_logica10   ir al estado 313
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 251
+
+  206 expresion_logica10: expresion_logica11 POTENCIA . expresion_logica10
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion_logica10   ir al estado 314
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 252
+
+   49 declaracion_campo: uno_o_mas_nombres ':' . tipo_no_estructurado_o_nombre_tipo ';'
+
+    BOOLEANO       desplazar e ir al estado 56
+    CADENA         desplazar e ir al estado 57
+    CARACTER       desplazar e ir al estado 58
+    CONJUNTO       desplazar e ir al estado 60
+    ENTERO         desplazar e ir al estado 61
+    FICHERO        desplazar e ir al estado 62
+    IDENTIFICADOR  desplazar e ir al estado 6
+    LISTA          desplazar e ir al estado 63
+    REAL           desplazar e ir al estado 64
+    '('            desplazar e ir al estado 66
+
+    nombre                              ir al estado 67
+    tipo_no_estructurado_o_nombre_tipo  ir al estado 315
+    tipo_escalar                        ir al estado 70
+    tipo_fichero                        ir al estado 71
+    tipo_enumerado                      ir al estado 72
+    tipo_lista                          ir al estado 73
+    tipo_lista_asociativa               ir al estado 74
+    tipo_conjunto                       ir al estado 75
+
+
+Estado 253
+
+   46 tipo_registro: REGISTRO '{' varias_declaraciones_campo '}' .
+
+    $default  reduce usando la regla 46 (tipo_registro)
+
+
+Estado 254
+
+   48 varias_declaraciones_campo: varias_declaraciones_campo declaracion_campo .
+
+    $default  reduce usando la regla 48 (varias_declaraciones_campo)
+
+
+Estado 255
+
+  173 varias_expresiones_constantes: varias_expresiones_constantes ',' expresion_constante .
+
+    $default  reduce usando la regla 173 (varias_expresiones_constantes)
+
+
+Estado 256
+
+   62 valor_constante: '[' . valores_constantes ']'
+   63                | '[' . claves_valores ']'
+   64                | '[' . campos_valores ']'
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 316
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '['            desplazar e ir al estado 256
+    '!'            desplazar e ir al estado 159
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 317
+    valores_constantes   ir al estado 318
+    valor_constante      ir al estado 319
+    claves_valores       ir al estado 320
+    clave_valor          ir al estado 321
+    campos_valores       ir al estado 322
+    campo_valor          ir al estado 323
+    llamada_subprograma  ir al estado 163
+    expresion            ir al estado 258
+    expresion_logica     ir al estado 165
+    expresion_logica1    ir al estado 166
+    expresion_logica2    ir al estado 167
+    expresion_logica3    ir al estado 168
+    expresion_logica4    ir al estado 169
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 257
+
+   58 declaracion_constante: nombre ':' tipo_no_estructurado_o_nombre_tipo '=' valor_constante . ';'
+
+    ';'  desplazar e ir al estado 324
+
+
+Estado 258
+
+   61 valor_constante: expresion .
+
+    $default  reduce usando la regla 61 (valor_constante)
+
+
+Estado 259
+
+   75 declaracion_variable: uno_o_mas_nombres ':' tipo_no_estructurado_o_nombre_tipo ';' .
+
+    $default  reduce usando la regla 75 (declaracion_variable)
+
+
+Estado 260
+
+   76 declaracion_variable: uno_o_mas_nombres ':' tipo_no_estructurado_o_nombre_tipo '=' . valor_constante ';'
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '['            desplazar e ir al estado 256
+    '!'            desplazar e ir al estado 159
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    valor_constante      ir al estado 325
+    llamada_subprograma  ir al estado 163
+    expresion            ir al estado 258
+    expresion_logica     ir al estado 165
+    expresion_logica1    ir al estado 166
+    expresion_logica2    ir al estado 167
+    expresion_logica3    ir al estado 168
+    expresion_logica4    ir al estado 169
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 261
+
+  143 instruccion_devolver: DEVOLVER expresion ';' .
+
+    $default  reduce usando la regla 143 (instruccion_devolver)
+
+
+Estado 262
+
+  149 instruccion_casos: EN CASO expresion . ES uno_o_mas_casos ';'
+
+    ES  desplazar e ir al estado 326
+
+
+Estado 263
+
+  169 instruccion_lanzar: LANZAR nombre ';' .
+
+    $default  reduce usando la regla 169 (instruccion_lanzar)
+
+
+Estado 264
+
+  159 clausula_iteracion: PARA nombre EN . objeto
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    nombre  ir al estado 327
+    objeto  ir al estado 328
+
+
+Estado 265
+
+  164 instruccion_probar_excepto: PROBAR bloque_instrucciones EXCEPTO . varias_clausula_excepcion
+  165                           | PROBAR bloque_instrucciones EXCEPTO . varias_clausula_excepcion FINALMENTE bloque_instrucciones
+
+    CUANDO  desplazar e ir al estado 329
+
+    varias_clausula_excepcion  ir al estado 330
+    clausula_excepcion         ir al estado 331
+
+
+Estado 266
+
+    7 nombre: nombre . CUATRO_PTOS IDENTIFICADOR
+  160 clausula_iteracion: REPITE ELEMENTO nombre . EN rango DESCENDENTE
+  161                   | REPITE ELEMENTO nombre . EN rango
+
+    CUATRO_PTOS  desplazar e ir al estado 10
+    EN           desplazar e ir al estado 332
+
+
+Estado 267
+
+  162 clausula_iteracion: REPITE HASTA expresion .
+
+    $default  reduce usando la regla 162 (clausula_iteracion)
+
+
+Estado 268
+
+  142 instruccion_salir: SALIR SI expresion . ';'
+
+    ';'  desplazar e ir al estado 333
+
+
+Estado 269
+
+  147 instruccion_si: SI expresion ENTONCES . bloque_instrucciones
+  148               | SI expresion ENTONCES . bloque_instrucciones SINO bloque_instrucciones
+
+    '{'  desplazar e ir al estado 83
+
+    bloque_instrucciones  ir al estado 334
+
+
+Estado 270
+
+  146 llamada_subprograma: nombre '(' cero_o_mas_expresiones . ')'
+
+    ')'  desplazar e ir al estado 335
+
+
+Estado 271
+
+  171 cero_o_mas_expresiones: varias_expresion .
+  175 varias_expresion: varias_expresion . ',' expresion
+
+    ','  desplazar e ir al estado 336
+
+    $default  reduce usando la regla 171 (cero_o_mas_expresiones)
+
+
+Estado 272
+
+  174 varias_expresion: expresion .
+
+    $default  reduce usando la regla 174 (varias_expresion)
+
+
+Estado 273
+
+  140 instruccion_asignacion: objeto '=' expresion . ';'
+
+    ';'  desplazar e ir al estado 337
+
+
+Estado 274
+
+  175 varias_expresion: varias_expresion . ',' expresion
+  215 objeto: objeto '[' varias_expresion . ']'
+
+    ','  desplazar e ir al estado 336
+    ']'  desplazar e ir al estado 338
+
+
+Estado 275
+
+  214 objeto: objeto '.' IDENTIFICADOR .
+
+    $default  reduce usando la regla 214 (objeto)
+
+
+Estado 276
+
+   80 varias_cabeceras_subprogramas: varias_cabeceras_subprogramas cabecera_subprograma ';' .
+
+    $default  reduce usando la regla 80 (varias_cabeceras_subprogramas)
+
+
+Estado 277
+
+    5 uno_o_mas_nombres: uno_o_mas_nombres . ',' nombre
+  124 parametros_formales: uno_o_mas_nombres . ':' tipo_no_estructurado_o_nombre_tipo
+  125                    | uno_o_mas_nombres . ':' tipo_no_estructurado_o_nombre_tipo MODIFICABLE
+
+    ','  desplazar e ir al estado 54
+    ':'  desplazar e ir al estado 339
+
+
+Estado 278
+
+  121 declaracion_parametros: '(' lista_parametros_formales . ')'
+  123 lista_parametros_formales: lista_parametros_formales . ';' parametros_formales
+
+    ';'  desplazar e ir al estado 340
+    ')'  desplazar e ir al estado 341
+
+
+Estado 279
+
+  122 lista_parametros_formales: parametros_formales .
+
+    $default  reduce usando la regla 122 (lista_parametros_formales)
+
+
+Estado 280
+
+  116 cabecera_funcion: FUNCION nombre declaracion_parametros FLECHA_DOBLE . tipo_no_estructurado_o_nombre_tipo
+
+    BOOLEANO       desplazar e ir al estado 56
+    CADENA         desplazar e ir al estado 57
+    CARACTER       desplazar e ir al estado 58
+    CONJUNTO       desplazar e ir al estado 60
+    ENTERO         desplazar e ir al estado 61
+    FICHERO        desplazar e ir al estado 62
+    IDENTIFICADOR  desplazar e ir al estado 6
+    LISTA          desplazar e ir al estado 63
+    REAL           desplazar e ir al estado 64
+    '('            desplazar e ir al estado 66
+
+    nombre                              ir al estado 67
+    tipo_no_estructurado_o_nombre_tipo  ir al estado 342
+    tipo_escalar                        ir al estado 70
+    tipo_fichero                        ir al estado 71
+    tipo_enumerado                      ir al estado 72
+    tipo_lista                          ir al estado 73
+    tipo_lista_asociativa               ir al estado 74
+    tipo_conjunto                       ir al estado 75
+
+
+Estado 281
+
+  126 bloque_subprograma: declaracion_tipos declaracion_constantes declaracion_variables . bloque_instrucciones
+
+    '{'  desplazar e ir al estado 83
+
+    bloque_instrucciones  ir al estado 343
+
+
+Estado 282
+
+   82 declaracion_clase: CLASE final '(' uno_o_mas_nombres ')' . '{' declaraciones_publicas ceroOuna_declaraciones_semi ceroOuna_declaraciones_privadas '}'
+
+    '{'  desplazar e ir al estado 344
+
+
+Estado 283
+
+  101 declaracion_constante_anidada: CONSTANTE declaracion_constante .
+
+    $default  reduce usando la regla 101 (declaracion_constante_anidada)
+
+
+Estado 284
+
+   89 declaraciones_publicas: PUBLICO varias_declaraciones_componentes .
+   94 varias_declaraciones_componentes: varias_declaraciones_componentes . declaracion_componente
+
+    CONSTANTE      desplazar e ir al estado 215
+    CONSTRUCTOR    desplazar e ir al estado 87
+    DESTRUCTOR     desplazar e ir al estado 88
+    FUNCION        desplazar e ir al estado 89
+    IDENTIFICADOR  desplazar e ir al estado 6
+    PROCEDIMIENTO  desplazar e ir al estado 90
+    TIPO           desplazar e ir al estado 217
+
+    $default  reduce usando la regla 89 (declaraciones_publicas)
+
+    uno_o_mas_nombres              ir al estado 218
+    nombre                         ir al estado 42
+    declaracion_componente         ir al estado 290
+    declaracion_tipo_anidado       ir al estado 222
+    declaracion_constante_anidada  ir al estado 223
+    declaracion_atributos          ir al estado 224
+    cabecera_subprograma           ir al estado 225
+    cabecera_funcion               ir al estado 94
+    cabecera_procedimiento         ir al estado 95
+    cabecera_constructor           ir al estado 96
+    cabecera_destructor            ir al estado 97
+
+
+Estado 285
+
+  100 declaracion_tipo_anidado: TIPO declaracion_tipo .
+
+    $default  reduce usando la regla 100 (declaracion_tipo_anidado)
+
+
+Estado 286
+
+  102 declaracion_atributos: uno_o_mas_nombres ':' . tipo_no_estructurado_o_nombre_tipo ';'
+
+    BOOLEANO       desplazar e ir al estado 56
+    CADENA         desplazar e ir al estado 57
+    CARACTER       desplazar e ir al estado 58
+    CONJUNTO       desplazar e ir al estado 60
+    ENTERO         desplazar e ir al estado 61
+    FICHERO        desplazar e ir al estado 62
+    IDENTIFICADOR  desplazar e ir al estado 6
+    LISTA          desplazar e ir al estado 63
+    REAL           desplazar e ir al estado 64
+    '('            desplazar e ir al estado 66
+
+    nombre                              ir al estado 67
+    tipo_no_estructurado_o_nombre_tipo  ir al estado 345
+    tipo_escalar                        ir al estado 70
+    tipo_fichero                        ir al estado 71
+    tipo_enumerado                      ir al estado 72
+    tipo_lista                          ir al estado 73
+    tipo_lista_asociativa               ir al estado 74
+    tipo_conjunto                       ir al estado 75
+
+
+Estado 287
+
+   91 declaraciones_semi: SEMIPUBLICO . varias_declaraciones_componentes
+
+    CONSTANTE      desplazar e ir al estado 215
+    CONSTRUCTOR    desplazar e ir al estado 87
+    DESTRUCTOR     desplazar e ir al estado 88
+    FUNCION        desplazar e ir al estado 89
+    IDENTIFICADOR  desplazar e ir al estado 6
+    PROCEDIMIENTO  desplazar e ir al estado 90
+    TIPO           desplazar e ir al estado 217
+
+    uno_o_mas_nombres                 ir al estado 218
+    nombre                            ir al estado 42
+    varias_declaraciones_componentes  ir al estado 346
+    declaracion_componente            ir al estado 221
+    declaracion_tipo_anidado          ir al estado 222
+    declaracion_constante_anidada     ir al estado 223
+    declaracion_atributos             ir al estado 224
+    cabecera_subprograma              ir al estado 225
+    cabecera_funcion                  ir al estado 94
+    cabecera_procedimiento            ir al estado 95
+    cabecera_constructor              ir al estado 96
+    cabecera_destructor               ir al estado 97
+
+
+Estado 288
+
+   81 declaracion_clase: CLASE final '{' declaraciones_publicas ceroOuna_declaraciones_semi . ceroOuna_declaraciones_privadas '}'
+
+    PRIVADO  desplazar e ir al estado 347
+
+    $default  reduce usando la regla 87 (ceroOuna_declaraciones_privadas)
+
+    ceroOuna_declaraciones_privadas  ir al estado 348
+    declaraciones_privadas           ir al estado 349
+
+
+Estado 289
+
+   86 ceroOuna_declaraciones_semi: declaraciones_semi .
+
+    $default  reduce usando la regla 86 (ceroOuna_declaraciones_semi)
+
+
+Estado 290
+
+   94 varias_declaraciones_componentes: varias_declaraciones_componentes declaracion_componente .
+
+    $default  reduce usando la regla 94 (varias_declaraciones_componentes)
+
+
+Estado 291
+
+   98 declaracion_componente: cabecera_subprograma ';' .
+   99                       | cabecera_subprograma ';' . modificadores ';'
+
+    ABSTRACTO   desplazar e ir al estado 350
+    ESPECIFICO  desplazar e ir al estado 351
+    FINAL       desplazar e ir al estado 352
+    GENERICO    desplazar e ir al estado 353
+
+    $default  reduce usando la regla 98 (declaracion_componente)
+
+    modificadores  ir al estado 354
+    modificador    ir al estado 355
+
+
+Estado 292
+
+  211 expresion_primaria: '(' expresion ')' .
+
+    $default  reduce usando la regla 211 (expresion_primaria)
+
+
+Estado 293
+
+   51 varios_rango: varios_rango ',' rango .
+
+    $default  reduce usando la regla 51 (varios_rango)
+
+
+Estado 294
+
+   43 tipo_lista: LISTA '[' varios_rango ']' DE . tipo_no_estructurado_o_nombre_tipo
+
+    BOOLEANO       desplazar e ir al estado 56
+    CADENA         desplazar e ir al estado 57
+    CARACTER       desplazar e ir al estado 58
+    CONJUNTO       desplazar e ir al estado 60
+    ENTERO         desplazar e ir al estado 61
+    FICHERO        desplazar e ir al estado 62
+    IDENTIFICADOR  desplazar e ir al estado 6
+    LISTA          desplazar e ir al estado 63
+    REAL           desplazar e ir al estado 64
+    '('            desplazar e ir al estado 66
+
+    nombre                              ir al estado 67
+    tipo_no_estructurado_o_nombre_tipo  ir al estado 356
+    tipo_escalar                        ir al estado 70
+    tipo_fichero                        ir al estado 71
+    tipo_enumerado                      ir al estado 72
+    tipo_lista                          ir al estado 73
+    tipo_lista_asociativa               ir al estado 74
+    tipo_conjunto                       ir al estado 75
+
+
+Estado 295
+
+   52 rango: expresion DOS_PTOS expresion .
+   53      | expresion DOS_PTOS expresion . DOS_PTOS expresion
+
+    DOS_PTOS  desplazar e ir al estado 357
+
+    $default  reduce usando la regla 52 (rango)
+
+
+Estado 296
+
+  177 expresion_logica: expresion_logica OR expresion_logica1 .
+  179 expresion_logica1: expresion_logica1 . AND expresion_logica2
+
+    AND  desplazar e ir al estado 234
+
+    $default  reduce usando la regla 177 (expresion_logica)
+
+
+Estado 297
+
+  179 expresion_logica1: expresion_logica1 AND expresion_logica2 .
+
+    $default  reduce usando la regla 179 (expresion_logica1)
+
+
+Estado 298
+
+  187 expresion_logica3: expresion_logica3 EQ expresion_logica4 .
+  190 expresion_logica4: expresion_logica4 . '^' expresion_logica5
+
+    '^'  desplazar e ir al estado 241
+
+    $default  reduce usando la regla 187 (expresion_logica3)
+
+
+Estado 299
+
+  186 expresion_logica3: expresion_logica3 GEQ expresion_logica4 .
+  190 expresion_logica4: expresion_logica4 . '^' expresion_logica5
+
+    '^'  desplazar e ir al estado 241
+
+    $default  reduce usando la regla 186 (expresion_logica3)
+
+
+Estado 300
+
+  185 expresion_logica3: expresion_logica3 LEQ expresion_logica4 .
+  190 expresion_logica4: expresion_logica4 . '^' expresion_logica5
+
+    '^'  desplazar e ir al estado 241
+
+    $default  reduce usando la regla 185 (expresion_logica3)
+
+
+Estado 301
+
+  188 expresion_logica3: expresion_logica3 NEQ expresion_logica4 .
+  190 expresion_logica4: expresion_logica4 . '^' expresion_logica5
+
+    '^'  desplazar e ir al estado 241
+
+    $default  reduce usando la regla 188 (expresion_logica3)
+
+
+Estado 302
+
+  183 expresion_logica3: expresion_logica3 '<' expresion_logica4 .
+  190 expresion_logica4: expresion_logica4 . '^' expresion_logica5
+
+    '^'  desplazar e ir al estado 241
+
+    $default  reduce usando la regla 183 (expresion_logica3)
+
+
+Estado 303
+
+  184 expresion_logica3: expresion_logica3 '>' expresion_logica4 .
+  190 expresion_logica4: expresion_logica4 . '^' expresion_logica5
+
+    '^'  desplazar e ir al estado 241
+
+    $default  reduce usando la regla 184 (expresion_logica3)
+
+
+Estado 304
+
+  190 expresion_logica4: expresion_logica4 '^' expresion_logica5 .
+  192 expresion_logica5: expresion_logica5 . '@' expresion_logica6
+
+    '@'  desplazar e ir al estado 242
+
+    $default  reduce usando la regla 190 (expresion_logica4)
+
+
+Estado 305
+
+  192 expresion_logica5: expresion_logica5 '@' expresion_logica6 .
+  194 expresion_logica6: expresion_logica6 . '&' expresion_logica7
+
+    '&'  desplazar e ir al estado 243
+
+    $default  reduce usando la regla 192 (expresion_logica5)
+
+
+Estado 306
+
+  194 expresion_logica6: expresion_logica6 '&' expresion_logica7 .
+  196 expresion_logica7: expresion_logica7 . DESPI expresion_logica8
+  197                  | expresion_logica7 . DESPD expresion_logica8
+
+    DESPD  desplazar e ir al estado 244
+    DESPI  desplazar e ir al estado 245
+
+    $default  reduce usando la regla 194 (expresion_logica6)
+
+
+Estado 307
+
+  197 expresion_logica7: expresion_logica7 DESPD expresion_logica8 .
+  199 expresion_logica8: expresion_logica8 . '+' expresion_logica9
+  200                  | expresion_logica8 . '-' expresion_logica9
+
+    '+'  desplazar e ir al estado 246
+    '-'  desplazar e ir al estado 247
+
+    $default  reduce usando la regla 197 (expresion_logica7)
+
+
+Estado 308
+
+  196 expresion_logica7: expresion_logica7 DESPI expresion_logica8 .
+  199 expresion_logica8: expresion_logica8 . '+' expresion_logica9
+  200                  | expresion_logica8 . '-' expresion_logica9
+
+    '+'  desplazar e ir al estado 246
+    '-'  desplazar e ir al estado 247
+
+    $default  reduce usando la regla 196 (expresion_logica7)
+
+
+Estado 309
+
+  199 expresion_logica8: expresion_logica8 '+' expresion_logica9 .
+  202 expresion_logica9: expresion_logica9 . '*' expresion_logica10
+  203                  | expresion_logica9 . '/' expresion_logica10
+  204                  | expresion_logica9 . '%' expresion_logica10
+
+    '*'  desplazar e ir al estado 248
+    '/'  desplazar e ir al estado 249
+    '%'  desplazar e ir al estado 250
+
+    $default  reduce usando la regla 199 (expresion_logica8)
+
+
+Estado 310
+
+  200 expresion_logica8: expresion_logica8 '-' expresion_logica9 .
+  202 expresion_logica9: expresion_logica9 . '*' expresion_logica10
+  203                  | expresion_logica9 . '/' expresion_logica10
+  204                  | expresion_logica9 . '%' expresion_logica10
+
+    '*'  desplazar e ir al estado 248
+    '/'  desplazar e ir al estado 249
+    '%'  desplazar e ir al estado 250
+
+    $default  reduce usando la regla 200 (expresion_logica8)
+
+
+Estado 311
+
+  202 expresion_logica9: expresion_logica9 '*' expresion_logica10 .
+
+    $default  reduce usando la regla 202 (expresion_logica9)
+
+
+Estado 312
+
+  203 expresion_logica9: expresion_logica9 '/' expresion_logica10 .
+
+    $default  reduce usando la regla 203 (expresion_logica9)
+
+
+Estado 313
+
+  204 expresion_logica9: expresion_logica9 '%' expresion_logica10 .
+
+    $default  reduce usando la regla 204 (expresion_logica9)
+
+
+Estado 314
+
+  206 expresion_logica10: expresion_logica11 POTENCIA expresion_logica10 .
+
+    $default  reduce usando la regla 206 (expresion_logica10)
+
+
+Estado 315
+
+   49 declaracion_campo: uno_o_mas_nombres ':' tipo_no_estructurado_o_nombre_tipo . ';'
+
+    ';'  desplazar e ir al estado 358
+
+
+Estado 316
+
+   67 clave_valor: CTC_CADENA . FLECHA_DOBLE valor_constante
+  219 expresion_constante: CTC_CADENA .
+
+    FLECHA_DOBLE  desplazar e ir al estado 359
+
+    $default  reduce usando la regla 219 (expresion_constante)
+
+
+Estado 317
+
+    7 nombre: nombre . CUATRO_PTOS IDENTIFICADOR
+   70 campo_valor: nombre . FLECHA_DOBLE valor_constante
+  146 llamada_subprograma: nombre . '(' cero_o_mas_expresiones ')'
+  216 objeto: nombre .
+
+    CUATRO_PTOS   desplazar e ir al estado 10
+    FLECHA_DOBLE  desplazar e ir al estado 360
+    '('           desplazar e ir al estado 199
+
+    $default  reduce usando la regla 216 (objeto)
+
+
+Estado 318
+
+   60 valores_constantes: valores_constantes . ',' valor_constante
+   62 valor_constante: '[' valores_constantes . ']'
+
+    ','  desplazar e ir al estado 361
+    ']'  desplazar e ir al estado 362
+
+
+Estado 319
+
+   59 valores_constantes: valor_constante .
+
+    $default  reduce usando la regla 59 (valores_constantes)
+
+
+Estado 320
+
+   63 valor_constante: '[' claves_valores . ']'
+   66 claves_valores: claves_valores . ',' clave_valor
+
+    ','  desplazar e ir al estado 363
+    ']'  desplazar e ir al estado 364
+
+
+Estado 321
+
+   65 claves_valores: clave_valor .
+
+    $default  reduce usando la regla 65 (claves_valores)
+
+
+Estado 322
+
+   64 valor_constante: '[' campos_valores . ']'
+   69 campos_valores: campos_valores . ',' campo_valor
+
+    ','  desplazar e ir al estado 365
+    ']'  desplazar e ir al estado 366
+
+
+Estado 323
+
+   68 campos_valores: campo_valor .
+
+    $default  reduce usando la regla 68 (campos_valores)
+
+
+Estado 324
+
+   58 declaracion_constante: nombre ':' tipo_no_estructurado_o_nombre_tipo '=' valor_constante ';' .
+
+    $default  reduce usando la regla 58 (declaracion_constante)
+
+
+Estado 325
+
+   76 declaracion_variable: uno_o_mas_nombres ':' tipo_no_estructurado_o_nombre_tipo '=' valor_constante . ';'
+
+    ';'  desplazar e ir al estado 367
+
+
+Estado 326
+
+  149 instruccion_casos: EN CASO expresion ES . uno_o_mas_casos ';'
+
+    CUANDO  desplazar e ir al estado 368
+
+    uno_o_mas_casos  ir al estado 369
+    caso             ir al estado 370
+
+
+Estado 327
+
+    7 nombre: nombre . CUATRO_PTOS IDENTIFICADOR
+  216 objeto: nombre .
+
+    CUATRO_PTOS  desplazar e ir al estado 10
+
+    $default  reduce usando la regla 216 (objeto)
+
+
+Estado 328
+
+  159 clausula_iteracion: PARA nombre EN objeto .
+  214 objeto: objeto . '.' IDENTIFICADOR
+  215       | objeto . '[' varias_expresion ']'
+
+    '['  desplazar e ir al estado 205
+    '.'  desplazar e ir al estado 206
+
+    $default  reduce usando la regla 159 (clausula_iteracion)
+
+
+Estado 329
+
+  168 clausula_excepcion: CUANDO . nombre EJECUTA bloque_instrucciones
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    nombre  ir al estado 371
+
+
+Estado 330
+
+  164 instruccion_probar_excepto: PROBAR bloque_instrucciones EXCEPTO varias_clausula_excepcion .
+  165                           | PROBAR bloque_instrucciones EXCEPTO varias_clausula_excepcion . FINALMENTE bloque_instrucciones
+  167 varias_clausula_excepcion: varias_clausula_excepcion . clausula_excepcion
+
+    CUANDO      desplazar e ir al estado 329
+    FINALMENTE  desplazar e ir al estado 372
+
+    $default  reduce usando la regla 164 (instruccion_probar_excepto)
+
+    clausula_excepcion  ir al estado 373
+
+
+Estado 331
+
+  166 varias_clausula_excepcion: clausula_excepcion .
+
+    $default  reduce usando la regla 166 (varias_clausula_excepcion)
+
+
+Estado 332
+
+  160 clausula_iteracion: REPITE ELEMENTO nombre EN . rango DESCENDENTE
+  161                   | REPITE ELEMENTO nombre EN . rango
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '!'            desplazar e ir al estado 159
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    rango                ir al estado 374
+    llamada_subprograma  ir al estado 163
+    expresion            ir al estado 164
+    expresion_logica     ir al estado 165
+    expresion_logica1    ir al estado 166
+    expresion_logica2    ir al estado 167
+    expresion_logica3    ir al estado 168
+    expresion_logica4    ir al estado 169
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 333
+
+  142 instruccion_salir: SALIR SI expresion ';' .
+
+    $default  reduce usando la regla 142 (instruccion_salir)
+
+
+Estado 334
+
+  147 instruccion_si: SI expresion ENTONCES bloque_instrucciones .
+  148               | SI expresion ENTONCES bloque_instrucciones . SINO bloque_instrucciones
+
+    SINO  desplazar e ir al estado 375
+
+    $default  reduce usando la regla 147 (instruccion_si)
+
+
+Estado 335
+
+  146 llamada_subprograma: nombre '(' cero_o_mas_expresiones ')' .
+
+    $default  reduce usando la regla 146 (llamada_subprograma)
+
+
+Estado 336
+
+  175 varias_expresion: varias_expresion ',' . expresion
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '!'            desplazar e ir al estado 159
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion            ir al estado 376
+    expresion_logica     ir al estado 165
+    expresion_logica1    ir al estado 166
+    expresion_logica2    ir al estado 167
+    expresion_logica3    ir al estado 168
+    expresion_logica4    ir al estado 169
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 337
+
+  140 instruccion_asignacion: objeto '=' expresion ';' .
+
+    $default  reduce usando la regla 140 (instruccion_asignacion)
+
+
+Estado 338
+
+  215 objeto: objeto '[' varias_expresion ']' .
+
+    $default  reduce usando la regla 215 (objeto)
+
+
+Estado 339
+
+  124 parametros_formales: uno_o_mas_nombres ':' . tipo_no_estructurado_o_nombre_tipo
+  125                    | uno_o_mas_nombres ':' . tipo_no_estructurado_o_nombre_tipo MODIFICABLE
+
+    BOOLEANO       desplazar e ir al estado 56
+    CADENA         desplazar e ir al estado 57
+    CARACTER       desplazar e ir al estado 58
+    CONJUNTO       desplazar e ir al estado 60
+    ENTERO         desplazar e ir al estado 61
+    FICHERO        desplazar e ir al estado 62
+    IDENTIFICADOR  desplazar e ir al estado 6
+    LISTA          desplazar e ir al estado 63
+    REAL           desplazar e ir al estado 64
+    '('            desplazar e ir al estado 66
+
+    nombre                              ir al estado 67
+    tipo_no_estructurado_o_nombre_tipo  ir al estado 377
+    tipo_escalar                        ir al estado 70
+    tipo_fichero                        ir al estado 71
+    tipo_enumerado                      ir al estado 72
+    tipo_lista                          ir al estado 73
+    tipo_lista_asociativa               ir al estado 74
+    tipo_conjunto                       ir al estado 75
+
+
+Estado 340
+
+  123 lista_parametros_formales: lista_parametros_formales ';' . parametros_formales
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    uno_o_mas_nombres    ir al estado 277
+    nombre               ir al estado 42
+    parametros_formales  ir al estado 378
+
+
+Estado 341
+
+  121 declaracion_parametros: '(' lista_parametros_formales ')' .
+
+    $default  reduce usando la regla 121 (declaracion_parametros)
+
+
+Estado 342
+
+  116 cabecera_funcion: FUNCION nombre declaracion_parametros FLECHA_DOBLE tipo_no_estructurado_o_nombre_tipo .
+
+    $default  reduce usando la regla 116 (cabecera_funcion)
+
+
+Estado 343
+
+  126 bloque_subprograma: declaracion_tipos declaracion_constantes declaracion_variables bloque_instrucciones .
+
+    $default  reduce usando la regla 126 (bloque_subprograma)
+
+
+Estado 344
+
+   82 declaracion_clase: CLASE final '(' uno_o_mas_nombres ')' '{' . declaraciones_publicas ceroOuna_declaraciones_semi ceroOuna_declaraciones_privadas '}'
+
+    CONSTANTE      desplazar e ir al estado 215
+    CONSTRUCTOR    desplazar e ir al estado 87
+    DESTRUCTOR     desplazar e ir al estado 88
+    FUNCION        desplazar e ir al estado 89
+    IDENTIFICADOR  desplazar e ir al estado 6
+    PROCEDIMIENTO  desplazar e ir al estado 90
+    PUBLICO        desplazar e ir al estado 216
+    TIPO           desplazar e ir al estado 217
+
+    uno_o_mas_nombres                 ir al estado 218
+    nombre                            ir al estado 42
+    declaraciones_publicas            ir al estado 379
+    varias_declaraciones_componentes  ir al estado 220
+    declaracion_componente            ir al estado 221
+    declaracion_tipo_anidado          ir al estado 222
+    declaracion_constante_anidada     ir al estado 223
+    declaracion_atributos             ir al estado 224
+    cabecera_subprograma              ir al estado 225
+    cabecera_funcion                  ir al estado 94
+    cabecera_procedimiento            ir al estado 95
+    cabecera_constructor              ir al estado 96
+    cabecera_destructor               ir al estado 97
+
+
+Estado 345
+
+  102 declaracion_atributos: uno_o_mas_nombres ':' tipo_no_estructurado_o_nombre_tipo . ';'
+
+    ';'  desplazar e ir al estado 380
+
+
+Estado 346
+
+   91 declaraciones_semi: SEMIPUBLICO varias_declaraciones_componentes .
+   94 varias_declaraciones_componentes: varias_declaraciones_componentes . declaracion_componente
+
+    CONSTANTE      desplazar e ir al estado 215
+    CONSTRUCTOR    desplazar e ir al estado 87
+    DESTRUCTOR     desplazar e ir al estado 88
+    FUNCION        desplazar e ir al estado 89
+    IDENTIFICADOR  desplazar e ir al estado 6
+    PROCEDIMIENTO  desplazar e ir al estado 90
+    TIPO           desplazar e ir al estado 217
+
+    $default  reduce usando la regla 91 (declaraciones_semi)
+
+    uno_o_mas_nombres              ir al estado 218
+    nombre                         ir al estado 42
+    declaracion_componente         ir al estado 290
+    declaracion_tipo_anidado       ir al estado 222
+    declaracion_constante_anidada  ir al estado 223
+    declaracion_atributos          ir al estado 224
+    cabecera_subprograma           ir al estado 225
+    cabecera_funcion               ir al estado 94
+    cabecera_procedimiento         ir al estado 95
+    cabecera_constructor           ir al estado 96
+    cabecera_destructor            ir al estado 97
+
+
+Estado 347
+
+   92 declaraciones_privadas: PRIVADO . varias_declaraciones_componentes
+
+    CONSTANTE      desplazar e ir al estado 215
+    CONSTRUCTOR    desplazar e ir al estado 87
+    DESTRUCTOR     desplazar e ir al estado 88
+    FUNCION        desplazar e ir al estado 89
+    IDENTIFICADOR  desplazar e ir al estado 6
+    PROCEDIMIENTO  desplazar e ir al estado 90
+    TIPO           desplazar e ir al estado 217
+
+    uno_o_mas_nombres                 ir al estado 218
+    nombre                            ir al estado 42
+    varias_declaraciones_componentes  ir al estado 381
+    declaracion_componente            ir al estado 221
+    declaracion_tipo_anidado          ir al estado 222
+    declaracion_constante_anidada     ir al estado 223
+    declaracion_atributos             ir al estado 224
+    cabecera_subprograma              ir al estado 225
+    cabecera_funcion                  ir al estado 94
+    cabecera_procedimiento            ir al estado 95
+    cabecera_constructor              ir al estado 96
+    cabecera_destructor               ir al estado 97
+
+
+Estado 348
+
+   81 declaracion_clase: CLASE final '{' declaraciones_publicas ceroOuna_declaraciones_semi ceroOuna_declaraciones_privadas . '}'
+
+    '}'  desplazar e ir al estado 382
+
+
+Estado 349
+
+   88 ceroOuna_declaraciones_privadas: declaraciones_privadas .
+
+    $default  reduce usando la regla 88 (ceroOuna_declaraciones_privadas)
+
+
+Estado 350
+
+  106 modificador: ABSTRACTO .
+
+    $default  reduce usando la regla 106 (modificador)
+
+
+Estado 351
+
+  107 modificador: ESPECIFICO .
+
+    $default  reduce usando la regla 107 (modificador)
+
+
+Estado 352
+
+  108 modificador: FINAL .
+
+    $default  reduce usando la regla 108 (modificador)
+
+
+Estado 353
+
+  105 modificador: GENERICO .
+
+    $default  reduce usando la regla 105 (modificador)
+
+
+Estado 354
+
+   99 declaracion_componente: cabecera_subprograma ';' modificadores . ';'
+  104 modificadores: modificadores . ',' modificador
+
+    ';'  desplazar e ir al estado 383
+    ','  desplazar e ir al estado 384
+
+
+Estado 355
+
+  103 modificadores: modificador .
+
+    $default  reduce usando la regla 103 (modificadores)
+
+
+Estado 356
+
+   43 tipo_lista: LISTA '[' varios_rango ']' DE tipo_no_estructurado_o_nombre_tipo .
+
+    $default  reduce usando la regla 43 (tipo_lista)
+
+
+Estado 357
+
+   53 rango: expresion DOS_PTOS expresion DOS_PTOS . expresion
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '!'            desplazar e ir al estado 159
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    llamada_subprograma  ir al estado 163
+    expresion            ir al estado 385
+    expresion_logica     ir al estado 165
+    expresion_logica1    ir al estado 166
+    expresion_logica2    ir al estado 167
+    expresion_logica3    ir al estado 168
+    expresion_logica4    ir al estado 169
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 358
+
+   49 declaracion_campo: uno_o_mas_nombres ':' tipo_no_estructurado_o_nombre_tipo ';' .
+
+    $default  reduce usando la regla 49 (declaracion_campo)
+
+
+Estado 359
+
+   67 clave_valor: CTC_CADENA FLECHA_DOBLE . valor_constante
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '['            desplazar e ir al estado 256
+    '!'            desplazar e ir al estado 159
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    valor_constante      ir al estado 386
+    llamada_subprograma  ir al estado 163
+    expresion            ir al estado 258
+    expresion_logica     ir al estado 165
+    expresion_logica1    ir al estado 166
+    expresion_logica2    ir al estado 167
+    expresion_logica3    ir al estado 168
+    expresion_logica4    ir al estado 169
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 360
+
+   70 campo_valor: nombre FLECHA_DOBLE . valor_constante
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '['            desplazar e ir al estado 256
+    '!'            desplazar e ir al estado 159
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    valor_constante      ir al estado 387
+    llamada_subprograma  ir al estado 163
+    expresion            ir al estado 258
+    expresion_logica     ir al estado 165
+    expresion_logica1    ir al estado 166
+    expresion_logica2    ir al estado 167
+    expresion_logica3    ir al estado 168
+    expresion_logica4    ir al estado 169
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 361
+
+   60 valores_constantes: valores_constantes ',' . valor_constante
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    '('            desplazar e ir al estado 158
+    '['            desplazar e ir al estado 256
+    '!'            desplazar e ir al estado 159
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    valor_constante      ir al estado 388
+    llamada_subprograma  ir al estado 163
+    expresion            ir al estado 258
+    expresion_logica     ir al estado 165
+    expresion_logica1    ir al estado 166
+    expresion_logica2    ir al estado 167
+    expresion_logica3    ir al estado 168
+    expresion_logica4    ir al estado 169
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 362
+
+   62 valor_constante: '[' valores_constantes ']' .
+
+    $default  reduce usando la regla 62 (valor_constante)
+
+
+Estado 363
+
+   66 claves_valores: claves_valores ',' . clave_valor
+
+    CTC_CADENA  desplazar e ir al estado 389
+
+    clave_valor  ir al estado 390
+
+
+Estado 364
+
+   63 valor_constante: '[' claves_valores ']' .
+
+    $default  reduce usando la regla 63 (valor_constante)
+
+
+Estado 365
+
+   69 campos_valores: campos_valores ',' . campo_valor
+
+    IDENTIFICADOR  desplazar e ir al estado 6
+
+    nombre       ir al estado 391
+    campo_valor  ir al estado 392
+
+
+Estado 366
+
+   64 valor_constante: '[' campos_valores ']' .
+
+    $default  reduce usando la regla 64 (valor_constante)
+
+
+Estado 367
+
+   76 declaracion_variable: uno_o_mas_nombres ':' tipo_no_estructurado_o_nombre_tipo '=' valor_constante ';' .
+
+    $default  reduce usando la regla 76 (declaracion_variable)
+
+
+Estado 368
+
+  152 caso: CUANDO . entradas FLECHA_DOBLE bloque_instrucciones
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    OTRO           desplazar e ir al estado 393
+    '('            desplazar e ir al estado 158
+    '!'            desplazar e ir al estado 159
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    rango                ir al estado 394
+    llamada_subprograma  ir al estado 163
+    entradas             ir al estado 395
+    entrada              ir al estado 396
+    expresion            ir al estado 397
+    expresion_logica     ir al estado 165
+    expresion_logica1    ir al estado 166
+    expresion_logica2    ir al estado 167
+    expresion_logica3    ir al estado 168
+    expresion_logica4    ir al estado 169
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 369
+
+  149 instruccion_casos: EN CASO expresion ES uno_o_mas_casos . ';'
+  151 uno_o_mas_casos: uno_o_mas_casos . caso
+
+    CUANDO  desplazar e ir al estado 368
+    ';'     desplazar e ir al estado 398
+
+    caso  ir al estado 399
+
+
+Estado 370
+
+  150 uno_o_mas_casos: caso .
+
+    $default  reduce usando la regla 150 (uno_o_mas_casos)
+
+
+Estado 371
+
+    7 nombre: nombre . CUATRO_PTOS IDENTIFICADOR
+  168 clausula_excepcion: CUANDO nombre . EJECUTA bloque_instrucciones
+
+    CUATRO_PTOS  desplazar e ir al estado 10
+    EJECUTA      desplazar e ir al estado 400
+
+
+Estado 372
+
+  165 instruccion_probar_excepto: PROBAR bloque_instrucciones EXCEPTO varias_clausula_excepcion FINALMENTE . bloque_instrucciones
+
+    '{'  desplazar e ir al estado 83
+
+    bloque_instrucciones  ir al estado 401
+
+
+Estado 373
+
+  167 varias_clausula_excepcion: varias_clausula_excepcion clausula_excepcion .
+
+    $default  reduce usando la regla 167 (varias_clausula_excepcion)
+
+
+Estado 374
+
+  160 clausula_iteracion: REPITE ELEMENTO nombre EN rango . DESCENDENTE
+  161                   | REPITE ELEMENTO nombre EN rango .
+
+    DESCENDENTE  desplazar e ir al estado 402
+
+    $default  reduce usando la regla 161 (clausula_iteracion)
+
+
+Estado 375
+
+  148 instruccion_si: SI expresion ENTONCES bloque_instrucciones SINO . bloque_instrucciones
+
+    '{'  desplazar e ir al estado 83
+
+    bloque_instrucciones  ir al estado 403
+
+
+Estado 376
+
+  175 varias_expresion: varias_expresion ',' expresion .
+
+    $default  reduce usando la regla 175 (varias_expresion)
+
+
+Estado 377
+
+  124 parametros_formales: uno_o_mas_nombres ':' tipo_no_estructurado_o_nombre_tipo .
+  125                    | uno_o_mas_nombres ':' tipo_no_estructurado_o_nombre_tipo . MODIFICABLE
+
+    MODIFICABLE  desplazar e ir al estado 404
+
+    $default  reduce usando la regla 124 (parametros_formales)
+
+
+Estado 378
+
+  123 lista_parametros_formales: lista_parametros_formales ';' parametros_formales .
+
+    $default  reduce usando la regla 123 (lista_parametros_formales)
+
+
+Estado 379
+
+   82 declaracion_clase: CLASE final '(' uno_o_mas_nombres ')' '{' declaraciones_publicas . ceroOuna_declaraciones_semi ceroOuna_declaraciones_privadas '}'
+
+    SEMIPUBLICO  desplazar e ir al estado 287
+
+    $default  reduce usando la regla 85 (ceroOuna_declaraciones_semi)
+
+    ceroOuna_declaraciones_semi  ir al estado 405
+    declaraciones_semi           ir al estado 289
+
+
+Estado 380
+
+  102 declaracion_atributos: uno_o_mas_nombres ':' tipo_no_estructurado_o_nombre_tipo ';' .
+
+    $default  reduce usando la regla 102 (declaracion_atributos)
+
+
+Estado 381
+
+   92 declaraciones_privadas: PRIVADO varias_declaraciones_componentes .
+   94 varias_declaraciones_componentes: varias_declaraciones_componentes . declaracion_componente
+
+    CONSTANTE      desplazar e ir al estado 215
+    CONSTRUCTOR    desplazar e ir al estado 87
+    DESTRUCTOR     desplazar e ir al estado 88
+    FUNCION        desplazar e ir al estado 89
+    IDENTIFICADOR  desplazar e ir al estado 6
+    PROCEDIMIENTO  desplazar e ir al estado 90
+    TIPO           desplazar e ir al estado 217
+
+    $default  reduce usando la regla 92 (declaraciones_privadas)
+
+    uno_o_mas_nombres              ir al estado 218
+    nombre                         ir al estado 42
+    declaracion_componente         ir al estado 290
+    declaracion_tipo_anidado       ir al estado 222
+    declaracion_constante_anidada  ir al estado 223
+    declaracion_atributos          ir al estado 224
+    cabecera_subprograma           ir al estado 225
+    cabecera_funcion               ir al estado 94
+    cabecera_procedimiento         ir al estado 95
+    cabecera_constructor           ir al estado 96
+    cabecera_destructor            ir al estado 97
+
+
+Estado 382
+
+   81 declaracion_clase: CLASE final '{' declaraciones_publicas ceroOuna_declaraciones_semi ceroOuna_declaraciones_privadas '}' .
+
+    $default  reduce usando la regla 81 (declaracion_clase)
+
+
+Estado 383
+
+   99 declaracion_componente: cabecera_subprograma ';' modificadores ';' .
+
+    $default  reduce usando la regla 99 (declaracion_componente)
+
+
+Estado 384
+
+  104 modificadores: modificadores ',' . modificador
+
+    ABSTRACTO   desplazar e ir al estado 350
+    ESPECIFICO  desplazar e ir al estado 351
+    FINAL       desplazar e ir al estado 352
+    GENERICO    desplazar e ir al estado 353
+
+    modificador  ir al estado 406
+
+
+Estado 385
+
+   53 rango: expresion DOS_PTOS expresion DOS_PTOS expresion .
+
+    $default  reduce usando la regla 53 (rango)
+
+
+Estado 386
+
+   67 clave_valor: CTC_CADENA FLECHA_DOBLE valor_constante .
+
+    $default  reduce usando la regla 67 (clave_valor)
+
+
+Estado 387
+
+   70 campo_valor: nombre FLECHA_DOBLE valor_constante .
+
+    $default  reduce usando la regla 70 (campo_valor)
+
+
+Estado 388
+
+   60 valores_constantes: valores_constantes ',' valor_constante .
+
+    $default  reduce usando la regla 60 (valores_constantes)
+
+
+Estado 389
+
+   67 clave_valor: CTC_CADENA . FLECHA_DOBLE valor_constante
+
+    FLECHA_DOBLE  desplazar e ir al estado 359
+
+
+Estado 390
+
+   66 claves_valores: claves_valores ',' clave_valor .
+
+    $default  reduce usando la regla 66 (claves_valores)
+
+
+Estado 391
+
+    7 nombre: nombre . CUATRO_PTOS IDENTIFICADOR
+   70 campo_valor: nombre . FLECHA_DOBLE valor_constante
+
+    CUATRO_PTOS   desplazar e ir al estado 10
+    FLECHA_DOBLE  desplazar e ir al estado 360
+
+
+Estado 392
+
+   69 campos_valores: campos_valores ',' campo_valor .
+
+    $default  reduce usando la regla 69 (campos_valores)
+
+
+Estado 393
+
+  157 entrada: OTRO .
+
+    $default  reduce usando la regla 157 (entrada)
+
+
+Estado 394
+
+  156 entrada: rango .
+
+    $default  reduce usando la regla 156 (entrada)
+
+
+Estado 395
+
+  152 caso: CUANDO entradas . FLECHA_DOBLE bloque_instrucciones
+  154 entradas: entradas . '|' entrada
+
+    FLECHA_DOBLE  desplazar e ir al estado 407
+    '|'           desplazar e ir al estado 408
+
+
+Estado 396
+
+  153 entradas: entrada .
+
+    $default  reduce usando la regla 153 (entradas)
+
+
+Estado 397
+
+   52 rango: expresion . DOS_PTOS expresion
+   53      | expresion . DOS_PTOS expresion DOS_PTOS expresion
+  155 entrada: expresion .
+
+    DOS_PTOS  desplazar e ir al estado 232
+
+    $default  reduce usando la regla 155 (entrada)
+
+
+Estado 398
+
+  149 instruccion_casos: EN CASO expresion ES uno_o_mas_casos ';' .
+
+    $default  reduce usando la regla 149 (instruccion_casos)
+
+
+Estado 399
+
+  151 uno_o_mas_casos: uno_o_mas_casos caso .
+
+    $default  reduce usando la regla 151 (uno_o_mas_casos)
+
+
+Estado 400
+
+  168 clausula_excepcion: CUANDO nombre EJECUTA . bloque_instrucciones
+
+    '{'  desplazar e ir al estado 83
+
+    bloque_instrucciones  ir al estado 409
+
+
+Estado 401
+
+  165 instruccion_probar_excepto: PROBAR bloque_instrucciones EXCEPTO varias_clausula_excepcion FINALMENTE bloque_instrucciones .
+
+    $default  reduce usando la regla 165 (instruccion_probar_excepto)
+
+
+Estado 402
+
+  160 clausula_iteracion: REPITE ELEMENTO nombre EN rango DESCENDENTE .
+
+    $default  reduce usando la regla 160 (clausula_iteracion)
+
+
+Estado 403
+
+  148 instruccion_si: SI expresion ENTONCES bloque_instrucciones SINO bloque_instrucciones .
+
+    $default  reduce usando la regla 148 (instruccion_si)
+
+
+Estado 404
+
+  125 parametros_formales: uno_o_mas_nombres ':' tipo_no_estructurado_o_nombre_tipo MODIFICABLE .
+
+    $default  reduce usando la regla 125 (parametros_formales)
+
+
+Estado 405
+
+   82 declaracion_clase: CLASE final '(' uno_o_mas_nombres ')' '{' declaraciones_publicas ceroOuna_declaraciones_semi . ceroOuna_declaraciones_privadas '}'
+
+    PRIVADO  desplazar e ir al estado 347
+
+    $default  reduce usando la regla 87 (ceroOuna_declaraciones_privadas)
+
+    ceroOuna_declaraciones_privadas  ir al estado 410
+    declaraciones_privadas           ir al estado 349
+
+
+Estado 406
+
+  104 modificadores: modificadores ',' modificador .
+
+    $default  reduce usando la regla 104 (modificadores)
+
+
+Estado 407
+
+  152 caso: CUANDO entradas FLECHA_DOBLE . bloque_instrucciones
+
+    '{'  desplazar e ir al estado 83
+
+    bloque_instrucciones  ir al estado 411
+
+
+Estado 408
+
+  154 entradas: entradas '|' . entrada
+
+    CTC_BOOLEANA   desplazar e ir al estado 107
+    CTC_CADENA     desplazar e ir al estado 108
+    CTC_CARACTER   desplazar e ir al estado 109
+    CTC_ENTERA     desplazar e ir al estado 110
+    CTC_REAL       desplazar e ir al estado 111
+    IDENTIFICADOR  desplazar e ir al estado 6
+    OTRO           desplazar e ir al estado 393
+    '('            desplazar e ir al estado 158
+    '!'            desplazar e ir al estado 159
+    '-'            desplazar e ir al estado 160
+
+    nombre               ir al estado 128
+    rango                ir al estado 394
+    llamada_subprograma  ir al estado 163
+    entrada              ir al estado 412
+    expresion            ir al estado 397
+    expresion_logica     ir al estado 165
+    expresion_logica1    ir al estado 166
+    expresion_logica2    ir al estado 167
+    expresion_logica3    ir al estado 168
+    expresion_logica4    ir al estado 169
+    expresion_logica5    ir al estado 170
+    expresion_logica6    ir al estado 171
+    expresion_logica7    ir al estado 172
+    expresion_logica8    ir al estado 173
+    expresion_logica9    ir al estado 174
+    expresion_logica10   ir al estado 175
+    expresion_logica11   ir al estado 176
+    expresion_primaria   ir al estado 177
+    objeto               ir al estado 178
+    expresion_constante  ir al estado 179
+
+
+Estado 409
+
+  168 clausula_excepcion: CUANDO nombre EJECUTA bloque_instrucciones .
+
+    $default  reduce usando la regla 168 (clausula_excepcion)
+
+
+Estado 410
+
+   82 declaracion_clase: CLASE final '(' uno_o_mas_nombres ')' '{' declaraciones_publicas ceroOuna_declaraciones_semi ceroOuna_declaraciones_privadas . '}'
+
+    '}'  desplazar e ir al estado 413
+
+
+Estado 411
+
+  152 caso: CUANDO entradas FLECHA_DOBLE bloque_instrucciones .
+
+    $default  reduce usando la regla 152 (caso)
+
+
+Estado 412
+
+  154 entradas: entradas '|' entrada .
+
+    $default  reduce usando la regla 154 (entradas)
+
+
+Estado 413
+
+   82 declaracion_clase: CLASE final '(' uno_o_mas_nombres ')' '{' declaraciones_publicas ceroOuna_declaraciones_semi ceroOuna_declaraciones_privadas '}' .
+
+    $default  reduce usando la regla 82 (declaracion_clase)
